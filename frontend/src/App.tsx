@@ -1,9 +1,13 @@
-import DashboardLayout from './components/layout/DashboardLayout'
+import DashboardLayout from "./components/layout/DashboardLayout";
+import ApiConnectionTest from "./components/ApiConnectionTest";
 
-function App(){
-  return(
-    <DashboardLayout/>
-  )
+function App() {
+  return (
+    <>
+      <ApiConnectionTest />
+      <DashboardLayout />
+    </>
+  );
 }
 
-export default App; 
+export default App;

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "sLlgFMrw0I8=",
+  "dgSpecHash": "KwFs/Yi3YpU=",
   "success": true,
   "projectFilePath": "D:\\eCommerceAdmin\\Backend\\Net_Backend.csproj",
   "expectedPackageFiles": [
@@ -8,7 +8,6 @@
     "C:\\Users\\hp\\.nuget\\packages\\dnsclient\\1.6.1\\dnsclient.1.6.1.nupkg.sha512",
     "C:\\Users\\hp\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\10.0.12\\microsoft.aspnetcore.authentication.jwtbearer.10.0.12.nupkg.sha512",
     "C:\\Users\\hp\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.12\\microsoft.aspnetcore.openapi.10.0.12.nupkg.sha512",
-    "C:\\Users\\hp\\.nuget\\packages\\microsoft.aspnetcore.spaproxy\\10.0.12\\microsoft.aspnetcore.spaproxy.10.0.12.nupkg.sha512",
     "C:\\Users\\hp\\.nuget\\packages\\microsoft.bcl.cryptography\\10.0.2\\microsoft.bcl.cryptography.10.0.2.nupkg.sha512",
     "C:\\Users\\hp\\.nuget\\packages\\microsoft.extensions.apidescription.server\\10.0.0\\microsoft.extensions.apidescription.server.10.0.0.nupkg.sha512",
     "C:\\Users\\hp\\.nuget\\packages\\microsoft.identitymodel.abstractions\\8.19.2\\microsoft.identitymodel.abstractions.8.19.2.nupkg.sha512",
