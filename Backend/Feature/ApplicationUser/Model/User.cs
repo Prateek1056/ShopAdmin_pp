@@ -1,19 +1,27 @@
-﻿using Net_Backend.Common.Dto;
+﻿
+using Net_Backend.Common.Dto;
 using Net_Backend.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using MongoDB.Driver;
 
 namespace Net_Backend.Feature.ApplicationUser.Model
 {
     public class User : Record
     {
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string Phone { get; set; }
-        public Gender Gender { get; set; }
-        public AddressModel Address { get; set; }
-        public DateTime DateofBirth { get; set; }
+        public string Name { get; set; } = string.Empty;
 
+        public string Email { get; set; } = string.Empty;
+
+        public string Phone { get; set; } = string.Empty;
+
+        public string PasswordHash { get; set; } = string.Empty;
+
+        public Gender Gender { get; set; } = Gender.Undefined;
+
+        public AddressModel Address { get; set; } = new();
+
+        public DateTime DateofBirth { get; set; }
     }
 
     public enum Gender
@@ -29,8 +37,23 @@ namespace Net_Backend.Feature.ApplicationUser.Model
 
     public class UserDb : RecordDB<User>
     {
-        public UserDb(MongoDBContext context, ClaimsPrincipal user) : base(context, user)
-        { }
+        public UserDb(MongoDBContext context, ClaimsPrincipal user)
+            : base(context, user)
+        {
+        }
+
         public override string CollectionName => "Users";
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await Collection
+                .Find(user => user.Email.ToLower() == email.ToLower())
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task CreateAsync(User user)
+        {
+            await Collection.InsertOneAsync(user);
+        }
     }
 }
