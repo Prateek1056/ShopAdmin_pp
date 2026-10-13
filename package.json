@@ -1,0 +1,13 @@
+
+{
+  "name": "shopadmin",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -n FRONTEND,BACKEND -c blue,green \"npm:dev:frontend\" \"npm:dev:backend\"",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "dotnet run --project Backend/Net_Backend.csproj"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
