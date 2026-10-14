@@ -4,7 +4,7 @@ namespace Net_Backend.Middleware.ReqContext
 {
     public class RequestContext
     {
-        private static readonly AsyncLocal<ClaimsPrincipal> _currentUser = new();
+        private static readonly AsyncLocal<ClaimsPrincipal?> _currentUser = new();
 
         public static ClaimsPrincipal? CurrentUser
         {

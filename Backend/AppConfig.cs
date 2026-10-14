@@ -4,11 +4,15 @@ namespace Net_Backend
 {
     public class AppConfig
     {
-        public string AppUrl { get; set; }
-        public string DeveloperEmail { get; set; }
-        public AppConfigJwt Jwt { get; set; }
-        public DBConfiguration DBConfig { get; set; }
-        public static AppConfig Current { get; protected set; }
+        public string AppUrl { get; set; } = string.Empty;
+
+        public string DeveloperEmail { get; set; } = string.Empty;
+
+        public AppConfigJwt Jwt { get; set; } = new();
+
+        public DBConfiguration DBConfig { get; set; } = new();
+
+        public static AppConfig Current { get; protected set; } = new();
 
         public static void Init(IConfiguration configuration)
         {
@@ -30,7 +34,8 @@ namespace Net_Backend
 
     public class AppConfigJwt
     {
-        public string Key { get; set; }
-        public string Issuer { get; set; }
+        public string Key { get; set; } = string.Empty;
+
+        public string Issuer { get; set; } = string.Empty;
     }
 }

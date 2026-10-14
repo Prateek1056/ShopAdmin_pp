@@ -32,12 +32,14 @@ namespace Net_Backend.Feature.ApplicationUser.Model
         Male = 1,
 
         [Display(Name = "Female")]
-        Female = 2,
+        Female = 2
     }
 
     public class UserDb : RecordDB<User>
     {
-        public UserDb(MongoDBContext context, ClaimsPrincipal user)
+        public UserDb(
+            MongoDBContext context,
+            ClaimsPrincipal user)
             : base(context, user)
         {
         }
@@ -46,14 +48,23 @@ namespace Net_Backend.Feature.ApplicationUser.Model
 
         public async Task<User?> GetByEmailAsync(string email)
         {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return null;
+            }
+
+            var normalizedEmail = email.Trim().ToLowerInvariant();
+
             return await Collection
-                .Find(user => user.Email.ToLower() == email.ToLower())
+                .Find(user => user.Email == normalizedEmail)
                 .FirstOrDefaultAsync();
         }
 
         public async Task CreateAsync(User user)
         {
-            await Collection.InsertOneAsync(user);
+            ArgumentNullException.ThrowIfNull(user);
+
+            await AddAsync(user);
         }
     }
 }

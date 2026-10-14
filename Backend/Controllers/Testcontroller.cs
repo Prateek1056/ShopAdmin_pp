@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Net_Backend.Data;
+using System.Security.Claims;
 
 namespace Net_Backend.Controllers
 {
@@ -16,6 +18,7 @@ namespace Net_Backend.Controllers
             _mongoDBContext = mongoDBContext;
         }
 
+        // Test backend and MongoDB connection
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -41,7 +44,20 @@ namespace Net_Backend.Controllers
                 });
             }
         }
+
+        // Test JWT authentication
+        [Authorize]
+        [HttpGet("protected")]
+        public IActionResult GetProtected()
+        {
+            return Ok(new
+            {
+                message = "JWT authentication successful!",
+                userId = User.FindFirst(
+                    ClaimTypes.NameIdentifier
+                )?.Value,
+                userName = User.Identity?.Name
+            });
+        }
     }
-
-
 }
