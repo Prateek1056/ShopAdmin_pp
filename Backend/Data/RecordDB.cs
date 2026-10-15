@@ -16,10 +16,10 @@ namespace Net_Backend.Data
         private readonly ILogger<RecordDB<T>>? _logger;
 
         public RecordDB(
-            MongoDBContext context,
-            ClaimsPrincipal? user,
-            DBConfiguration? dbConfig = null,
-            ILogger<RecordDB<T>>? logger = null)
+    MongoDBContext context,
+    ClaimsPrincipal? user,
+    DBConfiguration? dbConfig = null,
+    ILogger<RecordDB<T>>? logger = null)
         {
             ArgumentNullException.ThrowIfNull(context);
 
