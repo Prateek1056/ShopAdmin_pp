@@ -10,4 +10,3 @@
         public string PinCode { get; set; } = string.Empty;
     }
 }
-

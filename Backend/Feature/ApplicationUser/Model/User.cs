@@ -46,6 +46,18 @@ namespace Net_Backend.Feature.ApplicationUser.Model
 
         public override string CollectionName => "Users";
 
+        protected override void SetCreatedBy(User document)
+        {
+            ArgumentNullException.ThrowIfNull(document);
+
+            document.CreatedBy = new RecordUpdateInfo
+            {
+                UserId = document.Id,
+                UserName = document.Name,
+                Date = DateTime.UtcNow
+            };
+        }
+
         public async Task<User?> GetByEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
