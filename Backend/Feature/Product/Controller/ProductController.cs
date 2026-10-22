@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Net_Backend.Feature.Product.Dto.Request;
-using Net_Backend.Feature.Product.Services;
+using MyApp.Server.Utilities;
+using Net_Backend.Feature.Products.Dto.Request;
+using Net_Backend.Feature.Products.Entity;
+using Net_Backend.Feature.Products.Services;
 
-namespace Net_Backend.Feature.Product.Controller
+namespace Net_Backend.Feature.Products.Controller
 {
     [ApiController]
     [Authorize]
@@ -18,16 +20,20 @@ namespace Net_Backend.Feature.Product.Controller
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProduct(
-            [FromBody] CreateProductRequestDto request)
+        public async Task<ApiResponse<bool>> CreateProduct([FromBody] CreateProductRequestDto request)
         {
-            var createdProduct = await _productService.CreateAsync(request);
+            var response = new ApiResponse<bool>();
 
-            return CreatedAtAction(
-                nameof(CreateProduct),
-                new { id = createdProduct.Id },
-                createdProduct
-            );
+            try
+            {
+                return await _productService.CreateAsync(request);
+            }
+            catch (Exception ex)
+            {
+                response.AddError(ex.Message);
+            }
+
+            return response;
         }
     }
 }

@@ -1,7 +1,8 @@
 
+using System.Security.Claims;
 using Net_Backend.Data;
 
-namespace Net_Backend.Feature.Product.Entity
+namespace Net_Backend.Feature.Products.Entity
 {
     public class Product : Record
     {
@@ -18,5 +19,16 @@ namespace Net_Backend.Feature.Product.Entity
         public string ImageUrl { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
+    }
+
+    public class ProductDb : RecordDB<Product>
+    {
+        public ProductDb(DBConfiguration dbConfig, ClaimsPrincipal? user = null) : base(
+            new MongoDBContext(dbConfig),
+            user,
+            dbConfig
+        )
+        {
+        }
     }
 }

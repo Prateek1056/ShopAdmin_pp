@@ -343,9 +343,6 @@ namespace Net_Backend.Data
                 Date = DateTime.UtcNow
             };
         }
-
-
-
         #endregion
     }
 }

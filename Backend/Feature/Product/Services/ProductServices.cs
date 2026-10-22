@@ -1,59 +1,51 @@
-
-using ProductEntity = Net_Backend.Feature.Product.Entity.Product;
 using System.Security.Claims;
 using Net_Backend.Data;
-using Net_Backend.Feature.Product.Dto.Request;
-using Net_Backend.Feature.Product.Dto.Response;
 using Net_Backend.Middleware.ReqContext;
+using Net_Backend.Feature.Products.Entity;
+using MyApp.Server.Utilities;
 
-namespace Net_Backend.Feature.Product.Services
+namespace Net_Backend.Feature.Products.Services
 {
     public class ProductService
     {
-        private readonly RecordDB<ProductEntity> _productDb;
+        private readonly DBConfiguration _dbConfig;
+        private readonly ProductDb _productDb;
 
-        public ProductService(MongoDBContext context)
+        public ProductService(DBConfiguration dbConfig)
         {
-            _productDb = new RecordDB<ProductEntity>(
-                context,
-                RequestUser.Principal
-                    ?? new ClaimsPrincipal(new ClaimsIdentity()));
+            _dbConfig = dbConfig;
+            _productDb = new ProductDb(_dbConfig, RequestUser.UserId);
         }
 
-        public async Task<ProductDto> CreateAsync(
-            CreateProductRequestDto request)
+        public async Task<ApiResponse<bool>> CreateAsync(Product request)
         {
-            ArgumentNullException.ThrowIfNull(request);
-
-            var product = new ProductEntity
+            var response = new ApiResponse<bool>();
+            try
             {
-                Name = request.Name.Trim(),
-                Description = request.Description.Trim(),
-                Price = request.Price,
-                Category = request.Category.Trim(),
-                StockQuantity = request.StockQuantity,
-                ImageUrl = request.ImageUrl.Trim(),
-                IsActive = true
-            };
-
-            await _productDb.AddAsync(product);
-
-            return MapToDto(product);
-        }
-
-        private static ProductDto MapToDto(ProductEntity product)
-        {
-            return new ProductDto
+                if (request == null)
+                    return response.ErrorResponse("Please provide valid data");
+            }
+            catch (Exception ex)
             {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Category = product.Category,
-                StockQuantity = product.StockQuantity,
-                ImageUrl = product.ImageUrl,
-                IsActive = product.IsActive
-            };
+                response.AddError(ex.Message);
+            }
+
+            return response;
         }
+
+        // private static ProductDto MapToDto(ProductEntity product)
+        // {
+        //     return new ProductDto
+        //     {
+        //         Id = product.Id,
+        //         Name = product.Name,
+        //         Description = product.Description,
+        //         Price = product.Price,
+        //         Category = product.Category,
+        //         StockQuantity = product.StockQuantity,
+        //         ImageUrl = product.ImageUrl,
+        //         IsActive = product.IsActive
+        //     };
+        // }
     }
 }

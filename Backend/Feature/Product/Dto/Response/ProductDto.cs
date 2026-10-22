@@ -1,4 +1,4 @@
-namespace Net_Backend.Feature.Product.Dto.Response
+namespace Net_Backend.Feature.Products.Dto.Response
 {
     public class ProductDto
     {
