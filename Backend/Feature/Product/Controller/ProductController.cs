@@ -27,7 +27,7 @@ namespace Net_Backend.Feature.Products.Controller
             try
             {
                 return await _productService.CreateAsync(request);
-            }
+            }   
             catch (Exception ex)
             {
                 response.AddError(ex.Message);
