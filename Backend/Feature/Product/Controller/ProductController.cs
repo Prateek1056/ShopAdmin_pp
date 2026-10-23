@@ -1,33 +1,52 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyApp.Server.Utilities;
+using Net_Backend.Common;
+using Net_Backend.Data;
 using Net_Backend.Feature.Products.Dto.Request;
 using Net_Backend.Feature.Products.Entity;
 using Net_Backend.Feature.Products.Services;
+using Net_Backend.Utilities;
 
 namespace Net_Backend.Feature.Products.Controller
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
-    [Route("api/product")]
-    public class ProductController : ControllerBase
+    public class ProductController : ApiControllerBase
     {
-        private readonly ProductService _productService;
+        private readonly ProductServices _productServices;
 
-        public ProductController(ProductService productService)
+        public ProductController(DBConfiguration dbConfig)
+            : base(dbConfig)
         {
-            _productService = productService;
+            _productServices = new ProductServices(dbConfig);
         }
 
         [HttpPost]
-        public async Task<ApiResponse<bool>> CreateProduct([FromBody] CreateProductRequestDto request)
+        public async Task<ApiResponse<bool>> Create(
+            [FromBody] CreateProductRequestDto item)
         {
             var response = new ApiResponse<bool>();
 
             try
             {
-                return await _productService.CreateAsync(request);
-            }   
+                if (!ValidateModelState(response))
+                    return response;
+
+                if (item == null)
+                    return response.ErrorResponse("Invalid product data.");
+
+                var product = new Product
+                {
+                    Name = item.Name,
+                    Description = item.Description,
+                    Price = item.Price,
+                    Category = item.Category,
+                    StockQuantity = item.StockQuantity,
+                    ImageUrl = item.ImageUrl,
+                    IsActive = true
+                };
+
+                response = await _productServices.CreateAsync(product);
+            }
             catch (Exception ex)
             {
                 response.AddError(ex.Message);

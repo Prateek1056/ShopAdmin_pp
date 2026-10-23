@@ -3,7 +3,6 @@ using Net_Backend.Common.Dto;
 using Net_Backend.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using MongoDB.Driver;
 
 namespace Net_Backend.Feature.ApplicationUser.Model
 {
@@ -13,6 +12,7 @@ namespace Net_Backend.Feature.ApplicationUser.Model
 
         public string Email { get; set; } = string.Empty;
 
+        // Existing ShopAdmin fields — keep unchanged for now
         public string Phone { get; set; } = string.Empty;
 
         public string PasswordHash { get; set; } = string.Empty;
@@ -22,8 +22,30 @@ namespace Net_Backend.Feature.ApplicationUser.Model
         public AddressModel Address { get; set; } = new();
 
         public DateTime DateofBirth { get; set; }
+
+        // Properties from your mentor's User entity
+        public bool IsActive { get; set; } = true;
+
+        public bool IsDeleted { get; set; } = false;
+
+        public string RefreshToken { get; set; } = string.Empty;
+
+        public string ProfilePic { get; set; } = string.Empty;
+
+        public List<string> Roles { get; set; } = new();
+
+        public LastLogin? LastLogin { get; set; }
     }
 
+    public class LastLogin
+    {
+        public DateTime Time { get; set; }
+
+        public string IP { get; set; } = string.Empty;
+
+        public string Browser { get; set; } = string.Empty;
+    }
+    
     public enum Gender
     {
         Undefined = 0,
@@ -35,48 +57,29 @@ namespace Net_Backend.Feature.ApplicationUser.Model
         Female = 2
     }
 
-    public class UserDb : RecordDB<User>
+    public class UserDB : RecordDB<User>
     {
-        public UserDb(
-            MongoDBContext context,
-            ClaimsPrincipal user)
-            : base(context, user)
+        public UserDB(DBConfiguration dbConfig)
+            : base(dbConfig, null)
+        {
+        }
+
+        public UserDB(DBConfiguration dbConfig, ClaimsPrincipal user)
+            : base(dbConfig, user)
         {
         }
 
         public override string CollectionName => "Users";
 
-        protected override void SetCreatedBy(User document)
-        {
-            ArgumentNullException.ThrowIfNull(document);
-
-            document.CreatedBy = new RecordUpdateInfo
-            {
-                UserId = document.Id,
-                UserName = document.Name,
-                Date = DateTime.UtcNow
-            };
-        }
-
         public async Task<User?> GetByEmailAsync(string email)
         {
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                return null;
-            }
-
-            var normalizedEmail = email.Trim().ToLowerInvariant();
-
-            return await Collection
-                .Find(user => user.Email == normalizedEmail)
-                .FirstOrDefaultAsync();
+            return await GetAsync(
+                user => user.Email == email.Trim().ToLowerInvariant());
         }
 
-        public async Task CreateAsync(User user)
+        public async Task<bool> CreateAsync(User user)
         {
-            ArgumentNullException.ThrowIfNull(user);
-
-            await AddAsync(user);
+            return await AddAsync(user);
         }
     }
 }

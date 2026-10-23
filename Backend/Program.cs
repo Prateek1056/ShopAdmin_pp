@@ -1,12 +1,11 @@
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Net_Backend;
 using Net_Backend.Configuration;
 using Net_Backend.Data;
-using Net_Backend.Feature.ApplicationUser.Services;
-using Net_Backend.Feature.Product.Services;
+using Net_Backend.Feature.ApplicationUser.Service;
+using Net_Backend.Feature.Products.Services;
 using Net_Backend.Middleware.ReqContext;
 using Net_Backend.Services.Authentication;
 using System.Text;
@@ -53,7 +52,7 @@ builder.Services.AddAppConfiguration(builder.Configuration);
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<PasswordService>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<ProductServices>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

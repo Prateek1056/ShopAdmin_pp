@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MyApp.Server.Utilities
+namespace Net_Backend.Utilities
 {
     public class ApiResponse<T>
     {
@@ -17,7 +17,9 @@ namespace MyApp.Server.Utilities
             Data = data;
         }
 
-        public static ApiResponse<T> SuccessResponse(T? data, string message = "Success")
+        public static ApiResponse<T> SuccessResponse(
+            T? data,
+            string message = "Success")
         {
             return new ApiResponse<T>
             {

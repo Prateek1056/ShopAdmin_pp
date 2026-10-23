@@ -1,5 +1,5 @@
-using System.Security.Claims;
 using Net_Backend.Data;
+using System.Security.Claims;
 
 namespace Net_Backend.Feature.Products.Entity
 {
@@ -22,12 +22,16 @@ namespace Net_Backend.Feature.Products.Entity
 
     public class ProductDb : RecordDB<Product>
     {
-        public ProductDb(DBConfiguration dbConfig, ClaimsPrincipal? user = null) : base(
-            new MongoDBContext(dbConfig),
-            user,
-            dbConfig
-        )
+        public ProductDb(DBConfiguration dbConfig)
+            : base(dbConfig, null)
         {
         }
+
+        public ProductDb(DBConfiguration dbConfig, ClaimsPrincipal user)
+            : base(dbConfig, user)
+        {
+        }
+
+        public override string CollectionName => "Product";
     }
 }

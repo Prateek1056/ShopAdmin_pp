@@ -1,29 +1,46 @@
-using System.Security.Claims;
 using Net_Backend.Data;
-using Net_Backend.Middleware.ReqContext;
 using Net_Backend.Feature.Products.Entity;
-using MyApp.Server.Utilities;
+using Net_Backend.Middleware.ReqContext;
+using Net_Backend.Utilities;
 
 namespace Net_Backend.Feature.Products.Services
 {
-    public class ProductService
+    public class ProductServices
     {
         private readonly DBConfiguration _dbConfig;
-        private readonly ProductDb _productDb;
+        private readonly ProductDb _productDB;
 
-        public ProductService(DBConfiguration dbConfig)
+        public ProductServices(DBConfiguration dbConfig)
         {
             _dbConfig = dbConfig;
-            _productDb = new ProductDb(_dbConfig, RequestUser.UserId);
+            _productDB = new ProductDb(dbConfig, RequestUser.Principal);
         }
 
-        public async Task<ApiResponse<bool>> CreateAsync(Product request)
+        public async Task<ApiResponse<bool>> CreateAsync(Product item)
         {
             var response = new ApiResponse<bool>();
+
             try
             {
-                if (request == null)
-                    return response.ErrorResponse("Please provide valid data");
+                if (item == null)
+                    return response.ErrorResponse("Invalid product data.");
+
+                if (string.IsNullOrWhiteSpace(item.Name))
+                    return response.ErrorResponse("Product name is required.");
+
+                if (item.Price < 0)
+                    return response.ErrorResponse("Product price cannot be negative.");
+
+                if (item.StockQuantity < 0)
+                    return response.ErrorResponse("Stock quantity cannot be negative.");
+
+                response.Data = await _productDB.AddAsync(item);
+                response.Success = response.Data;
+
+                if (response.Success)
+                    response.Message = "Product created successfully";
+                else
+                    response.AddError("Failed to create product.");
             }
             catch (Exception ex)
             {
@@ -32,20 +49,5 @@ namespace Net_Backend.Feature.Products.Services
 
             return response;
         }
-
-        // private static ProductDto MapToDto(ProductEntity product)
-        // {
-        //     return new ProductDto
-        //     {
-        //         Id = product.Id,
-        //         Name = product.Name,
-        //         Description = product.Description,
-        //         Price = product.Price,
-        //         Category = product.Category,
-        //         StockQuantity = product.StockQuantity,
-        //         ImageUrl = product.ImageUrl,
-        //         IsActive = product.IsActive
-        //     };
-        // }
     }
 }

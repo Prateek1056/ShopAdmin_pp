@@ -1,74 +1,51 @@
-﻿
-using Backend.Feature.Auth.Dto;
-using Microsoft.AspNetCore.Mvc;
-using Net_Backend.Feature.ApplicationUser.Services;
+﻿using Microsoft.AspNetCore.Mvc;
+using Net_Backend.Common;
+using Net_Backend.Data;
+using Net_Backend.Feature.Auth.DTO.Request;
+using Net_Backend.Feature.Auth.DTO.Response;
+using Net_Backend.Feature.Auth.Services;
 using Net_Backend.Services.Authentication;
+using Net_Backend.Utilities;
 
-namespace Backend.Feature.Auth.Controller
+namespace Net_Backend.Feature.Auth.Controller
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/auth")]
-    public class LoginController : ControllerBase
+    public class LoginController : ApiControllerBase
     {
-        private readonly UserService _userService;
-        private readonly JwtTokenService _jwtTokenService;
+        private readonly LoginService _loginService;
 
         public LoginController(
-            UserService userService,
+            DBConfiguration dbConfig,
+            PasswordService passwordService,
             JwtTokenService jwtTokenService)
+            : base(dbConfig)
         {
-            _userService = userService;
-            _jwtTokenService = jwtTokenService;
+            _loginService = new LoginService(
+                dbConfig,
+                passwordService,
+                jwtTokenService);
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login(
-            [FromBody] LoginRequestDto request)
+        [HttpPost]
+        public async Task<ApiResponse<AuthResponseDto>> Login(
+            [FromBody] LoginRequestDto item)
         {
-            var user = await _userService.GetByEmailAsync(
-                request.Email
-            );
+            var response = new ApiResponse<AuthResponseDto>();
 
-            if (user == null)
+            try
             {
-                return Unauthorized(new
-                {
-                    success = false,
-                    message = "Invalid email or password."
-                });
+                if (!ValidateModelState(response))
+                    return response;
+
+                response = await _loginService.Login(item);
+            }
+            catch (Exception ex)
+            {
+                response.AddError(ex.Message);
             }
 
-            var isPasswordValid = _userService.VerifyPassword(
-                request.Password,
-                user.PasswordHash
-            );
-
-            if (!isPasswordValid)
-            {
-                return Unauthorized(new
-                {
-                    success = false,
-                    message = "Invalid email or password."
-                });
-            }
-
-            var token = _jwtTokenService.GenerateToken(
-                user.Id,
-                user.Name
-            );
-
-            return Ok(new
-            {
-                success = true,
-                message = "Login successful.",
-                data = new
-                {
-                    user.Id,
-                    user.Name,
-                    user.Email,
-                    token
-                }
-            });
+            return response;
         }
     }
 }

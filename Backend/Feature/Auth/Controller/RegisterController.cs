@@ -1,54 +1,48 @@
-﻿
-using Backend.Feature.Auth.Dto;
-using Microsoft.AspNetCore.Mvc;
-using Net_Backend.Feature.ApplicationUser.Services;
+﻿using Microsoft.AspNetCore.Mvc;
+using Net_Backend.Common;
+using Net_Backend.Data;
+using Net_Backend.Feature.Auth.DTO.Request;
+using Net_Backend.Feature.Auth.Services;
+using Net_Backend.Services.Authentication;
+using Net_Backend.Utilities;
 
 namespace Net_Backend.Feature.Auth.Controller
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/auth")]
-    public class RegisterController : ControllerBase
+    public class RegisterController : ApiControllerBase
     {
-        private readonly UserService _userService;
+        private readonly RegisterService _registerService;
 
-        public RegisterController(UserService userService)
+        public RegisterController(
+            DBConfiguration dbConfig,
+            PasswordService passwordService)
+            : base(dbConfig)
         {
-            _userService = userService;
+            _registerService = new RegisterService(
+                dbConfig,
+                passwordService);
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register(
-            [FromBody] RegisterRequestDto request)
+        [HttpPost]
+        public async Task<ApiResponse<bool>> Register(
+            [FromBody] RegisterRequestDto item)
         {
-            var emailExists = await _userService
-                .EmailExistsAsync(request.Email);
+            var response = new ApiResponse<bool>();
 
-            if (emailExists)
+            try
             {
-                return Conflict(new
-                {
-                    success = false,
-                    message = "This email is already registered."
-                });
+                if (!ValidateModelState(response))
+                    return response;
+
+                response = await _registerService.RegisterUser(item);
+            }
+            catch (Exception ex)
+            {
+                response.AddError(ex.Message);
             }
 
-            var user = await _userService.RegisterAsync(request);
-
-            return StatusCode(201, new
-            {
-                success = true,
-                message = "Registration successful.",
-                data = new
-                {
-                    user.Id,
-                    user.Name,
-                    user.Email,
-                    user.Phone,
-                    user.Gender,
-                    user.Address,
-                    user.DateofBirth
-                }
-            });
+            return response;
         }
     }
 }

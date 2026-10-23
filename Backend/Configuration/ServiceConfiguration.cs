@@ -7,18 +7,16 @@ namespace Net_Backend.Configuration
     public static class ServiceConfiguration
     {
         public static void AddAppConfiguration(
-        this IServiceCollection services,
-        IConfiguration configuration)
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
             var dbConfig = configuration
-            .GetSection("DBConfiguration")
-            .Get<DBConfiguration>()
-            ?? throw new InvalidOperationException(
-            "DBConfiguration section is missing.");
+                .GetSection("DBConfiguration")
+                .Get<DBConfiguration>()
+                ?? throw new InvalidOperationException(
+                    "DBConfiguration section is missing.");
 
             services.AddSingleton(dbConfig);
-            services.AddSingleton<MongoDBContext>();
         }
     }
-
 }
