@@ -5,16 +5,20 @@ namespace Net_Backend.Utilities
     public class ApiResponse<T>
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string? Message { get; set; }
         public T? Data { get; set; }
 
-        public ApiResponse() { }
+        public ApiResponse()
+        {
+            Errors = new List<ApiError>();
+        }
 
-        public ApiResponse(bool success, string message, T? data)
+        public ApiResponse(bool success, string? message, T? data)
         {
             Success = success;
             Message = message;
             Data = data;
+            Errors = new List<ApiError>();
         }
 
         public static ApiResponse<T> SuccessResponse(
@@ -25,30 +29,23 @@ namespace Net_Backend.Utilities
             {
                 Success = true,
                 Message = message,
-                Data = data
+                Data = data,
+                Errors = new List<ApiError>()
             };
         }
 
         [NotMapped]
-        public List<ApiError> Errors { get; set; }
+        public List<ApiError>? Errors { get; set; }
 
         public void AddError(Exception ex)
         {
-            if (Errors == null)
-            {
-                Errors = new List<ApiError>();
-            }
-
+            Errors ??= new List<ApiError>();
             Errors.Add(new ApiError(ex.Message));
         }
 
         public void AddError(string message)
         {
-            if (Errors == null)
-            {
-                Errors = new List<ApiError>();
-            }
-
+            Errors ??= new List<ApiError>();
             Errors.Add(new ApiError(message));
         }
     }

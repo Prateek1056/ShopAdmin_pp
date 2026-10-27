@@ -17,6 +17,7 @@ namespace Net_Backend.Configuration
                     "DBConfiguration section is missing.");
 
             services.AddSingleton(dbConfig);
+            services.AddSingleton<MongoDBContext>();
         }
     }
 }

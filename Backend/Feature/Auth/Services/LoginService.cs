@@ -55,8 +55,8 @@ namespace Net_Backend.Feature.Auth.Services
                     return response.ErrorResponse("Invalid email or password.");
 
                 var authResponse = _jwtTokenService.GenerateToken(
-                    user.Id,
-                    user.Name
+                    user.Id ?? string.Empty,
+                    user.Name ?? string.Empty
                 );
 
                 response.Data = authResponse;

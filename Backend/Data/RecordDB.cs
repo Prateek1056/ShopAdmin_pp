@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Net_Backend.Middleware.ReqContext;
 using System.Linq.Expressions;
@@ -203,10 +203,32 @@ namespace Net_Backend.Data
             if (document == null)
                 return;
 
+            var userId = User?.GetUserId();
+            var userName = User?.GetUserName();
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                if (document.GetType().Name == "User" && !string.IsNullOrEmpty(document.Id))
+                {
+                    userId = document.Id;
+                }
+                else
+                {
+                    userId = null;
+                }
+            }
+
+            if (string.IsNullOrEmpty(userName))
+            {
+                var nameProp = document.GetType().GetProperty("Name");
+                var nameVal = nameProp?.GetValue(document) as string;
+                userName = !string.IsNullOrWhiteSpace(nameVal) ? nameVal : "System";
+            }
+
             document.CreatedBy = new RecordUpdateInfo
             {
-                UserId = User?.GetUserId() ?? string.Empty,
-                UserName = User?.GetUserName() ?? string.Empty,
+                UserId = string.IsNullOrEmpty(userId) ? null : userId,
+                UserName = userName,
                 Date = DateTime.UtcNow
             };
         }
@@ -216,10 +238,13 @@ namespace Net_Backend.Data
             if (document == null)
                 return;
 
+            var userId = User?.GetUserId();
+            var userName = User?.GetUserName();
+
             document.UpdatedBy = new RecordUpdateInfo
             {
-                UserId = User?.GetUserId() ?? string.Empty,
-                UserName = User?.GetUserName() ?? string.Empty,
+                UserId = string.IsNullOrEmpty(userId) ? null : userId,
+                UserName = string.IsNullOrEmpty(userName) ? "System" : userName,
                 Date = DateTime.UtcNow
             };
         }

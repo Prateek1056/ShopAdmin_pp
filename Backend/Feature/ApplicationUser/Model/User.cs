@@ -1,4 +1,4 @@
-﻿
+
 using Net_Backend.Common.Dto;
 using Net_Backend.Data;
 using System.ComponentModel.DataAnnotations;
@@ -64,7 +64,7 @@ namespace Net_Backend.Feature.ApplicationUser.Model
         {
         }
 
-        public UserDB(DBConfiguration dbConfig, ClaimsPrincipal user)
+        public UserDB(DBConfiguration dbConfig, ClaimsPrincipal? user)
             : base(dbConfig, user)
         {
         }

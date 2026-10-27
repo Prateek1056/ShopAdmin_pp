@@ -20,8 +20,7 @@ namespace Net_Backend.Feature.Products.Dto.Request
         [Range(0, int.MaxValue)]
         public int StockQuantity { get; set; }
 
-        [Url]
         [StringLength(2048)]
-        public string ImageUrl { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
     }
 }

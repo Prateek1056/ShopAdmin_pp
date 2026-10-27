@@ -8,7 +8,7 @@ namespace Net_Backend.Feature.Products.Dto.Response
         public decimal Price { get; set; }
         public string Category { get; set; } = string.Empty;
         public int StockQuantity { get; set; }
-        public string ImageUrl { get; set; } = string.Empty;
+       
         public bool IsActive { get; set; }
     }
 }
