@@ -1,8 +1,8 @@
+using System.Security.Claims;
 using Net_Backend.Data;
 using Net_Backend.Feature.Products.Dto.Request;
 using Net_Backend.Feature.Products.Dto.Response;
 using Net_Backend.Feature.Products.Entity;
-using Net_Backend.Middleware.ReqContext;
 using Net_Backend.Utilities;
 
 namespace Net_Backend.Feature.Products.Services
@@ -15,10 +15,12 @@ namespace Net_Backend.Feature.Products.Services
         public ProductServices(DBConfiguration dbConfig)
         {
             _dbConfig = dbConfig;
-            _productDB = new ProductDb(dbConfig, RequestUser.Principal);
+            _productDB = new ProductDb(dbConfig);
         }
 
-        public async Task<ApiResponse<bool>> CreateAsync(Product item)
+        public async Task<ApiResponse<bool>> CreateAsync(
+            Product item,
+            ClaimsPrincipal user)
         {
             var response = new ApiResponse<bool>();
 
@@ -26,6 +28,9 @@ namespace Net_Backend.Feature.Products.Services
             {
                 if (item == null)
                     return response.ErrorResponse("Invalid product data.");
+
+                if (user?.Identity?.IsAuthenticated != true)
+                    return response.ErrorResponse("User is not authenticated.");
 
                 if (string.IsNullOrWhiteSpace(item.Name))
                     return response.ErrorResponse("Product name is required.");
@@ -36,7 +41,10 @@ namespace Net_Backend.Feature.Products.Services
                 if (item.StockQuantity < 0)
                     return response.ErrorResponse("Stock quantity cannot be negative.");
 
-                response.Data = await _productDB.AddAsync(item);
+                // Create a database object with the current request's user.
+                var productDB = new ProductDb(_dbConfig, user);
+
+                response.Data = await productDB.AddAsync(item);
                 response.Success = response.Data;
 
                 if (response.Success)
@@ -120,7 +128,8 @@ namespace Net_Backend.Feature.Products.Services
 
         public async Task<ApiResponse<bool>> UpdateAsync(
             string id,
-            UpdateProductRequestDto item)
+            UpdateProductRequestDto item,
+            ClaimsPrincipal user)
         {
             var response = new ApiResponse<bool>();
 
@@ -131,6 +140,9 @@ namespace Net_Backend.Feature.Products.Services
 
                 if (item == null)
                     return response.ErrorResponse("Invalid product data.");
+
+                if (user?.Identity?.IsAuthenticated != true)
+                    return response.ErrorResponse("User is not authenticated.");
 
                 if (string.IsNullOrWhiteSpace(item.Name))
                     return response.ErrorResponse("Product name is required.");
@@ -153,7 +165,10 @@ namespace Net_Backend.Feature.Products.Services
                 product.StockQuantity = item.StockQuantity;
                 product.ImageUrl = item.ImageUrl ?? string.Empty;
 
-                response.Data = await _productDB.UpdateAsync(product);
+                // Use the current authenticated user for UpdatedBy.
+                var productDB = new ProductDb(_dbConfig, user);
+
+                response.Data = await productDB.UpdateAsync(product);
                 response.Success = response.Data;
 
                 if (response.Success)

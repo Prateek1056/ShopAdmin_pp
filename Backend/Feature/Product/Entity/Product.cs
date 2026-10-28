@@ -1,6 +1,5 @@
-
-using Net_Backend.Data;
 using System.Security.Claims;
+using Net_Backend.Data;
 
 namespace Net_Backend.Feature.Products.Entity
 {
@@ -34,25 +33,5 @@ namespace Net_Backend.Feature.Products.Entity
         }
 
         public override string CollectionName => "Product";
-
-        protected override void SetCreatedBy(Product document)
-        {
-            document.CreatedBy = new RecordUpdateInfo
-            {
-                UserId = null,
-                UserName = string.Empty,
-                Date = default
-            };
-        }
-
-        protected override void SetUpdatedBy(Product document)
-        {
-            document.UpdatedBy = new RecordUpdateInfo
-            {
-                UserId = null,
-                UserName = string.Empty,
-                Date = default
-            };
-        }
     }
 }

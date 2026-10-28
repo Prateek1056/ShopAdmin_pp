@@ -1,13 +1,11 @@
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Net_Backend.Common;
 using Net_Backend.Data;
 using Net_Backend.Feature.Products.Dto.Request;
 using Net_Backend.Feature.Products.Services;
-using Net_Backend.Utilities;
 using Net_Backend.Feature.Products.Entity;
-using Microsoft.AspNetCore.Authorization;
-using Net_Backend.Middleware.ReqContext;
+using Net_Backend.Utilities;
 
 namespace Net_Backend.Feature.Products.Controller
 {
@@ -46,16 +44,10 @@ namespace Net_Backend.Feature.Products.Controller
                     Category = item.Category,
                     StockQuantity = item.StockQuantity,
                     ImageUrl = item.ImageUrl ?? string.Empty,
-                    IsActive = true,
-                    CreatedBy = new RecordUpdateInfo
-                    {
-                        UserId = RequestUser.Principal?.GetUserId(),
-                        UserName = RequestUser.Principal?.GetUserName(),
-                        Date = DateTime.UtcNow
-                    }
+                    IsActive = true
                 };
 
-                response = await _productServices.CreateAsync(product);
+                response = await _productServices.CreateAsync(product, User);
             }
             catch (Exception ex)
             {
@@ -64,6 +56,7 @@ namespace Net_Backend.Feature.Products.Controller
 
             return response;
         }
+
 
         [HttpPut("{id}")]
         public async Task<ApiResponse<bool>> Update(
@@ -77,7 +70,7 @@ namespace Net_Backend.Feature.Products.Controller
                 if (!ValidateModelState(response))
                     return response;
 
-                response = await _productServices.UpdateAsync(id, item);
+                response = await _productServices.UpdateAsync(id, item, User);
             }
             catch (Exception ex)
             {
