@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.4",
+    "@tanstack/react-form": "^1.33.5",
+    "@tanstack/react-query": "^5.105.0",
+    "@tanstack/react-router": "^1.170.46",
     "antd": "^6.6.3",
     "echarts": "^6.1.0",
     "echarts-for-react": "^3.0.6",
@@ -22,6 +25,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/router-plugin": "^1.168.48",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
