@@ -4,25 +4,20 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
+export interface CurrentUserDto {
+  userId: string;
+  userName: string;
+}
+
+export interface ApiError {
+  message: string;
 }
 
 export interface ApiResponse<T> {
   success: boolean;
-  message?: string;
-  data: T;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
+  message: string;
+  data: T | null;
+  errors: ApiError[];
 }
 
 export interface AddressModel {
@@ -42,10 +37,4 @@ export interface RegisterRequest {
   gender: number;
   address: AddressModel;
   dateofBirth: string;
-}
-
-export interface ApiResponse<T> {
-  success: boolean;
-  message?: string;
-  data: T;
 }

@@ -1,4 +1,4 @@
-namespace Net_Backend.Data
+﻿namespace Net_Backend.Data
 {
     public class DBConfiguration
     {

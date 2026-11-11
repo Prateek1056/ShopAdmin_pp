@@ -13,13 +13,14 @@ function LoginPage() {
 
   const loginMutation = useMutation({
     mutationFn: loginUser,
+
     onSuccess: (response) => {
-      if (!response.success || !response.data?.accessToken) {
+      if (!response.success || !response.data) {
         throw new Error(response.message || "Login failed.");
       }
 
-      sessionStorage.setItem("accessToken", response.data.accessToken);
-      sessionStorage.setItem("refreshToken", response.data.refreshToken);
+      // Tokens are now stored in HttpOnly cookies by the backend.
+      // No sessionStorage or localStorage is required.
 
       navigate({ to: "/dashboard" });
     },
@@ -30,6 +31,7 @@ function LoginPage() {
       email: "",
       password: "",
     },
+
     onSubmit: async ({ value }) => {
       loginMutation.reset();
       await loginMutation.mutateAsync(value);
@@ -81,7 +83,9 @@ function LoginPage() {
                   autoComplete="email"
                   value={field.state.value}
                   onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
+                  onChange={(event) =>
+                    field.handleChange(event.target.value)
+                  }
                   placeholder="you@example.com"
                   className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
@@ -117,7 +121,9 @@ function LoginPage() {
                   autoComplete="current-password"
                   value={field.state.value}
                   onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
+                  onChange={(event) =>
+                    field.handleChange(event.target.value)
+                  }
                   placeholder="Enter your password"
                   className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />

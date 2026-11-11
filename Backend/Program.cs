@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -17,7 +18,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("FrontendPolicy", policy =>
     {
         policy
-            .SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
+            .WithOrigins("http://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -71,6 +72,24 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(AppConfig.Current.Jwt.Key)
             )
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                // First, try reading the JWT from the HttpOnly cookie.
+                if (context.Request.Cookies.TryGetValue(
+                    "accessToken",
+                    out var accessToken))
+                {
+                    context.Token = accessToken;
+                }
+
+                // If no cookie exists, JwtBearer can still read
+                // the Authorization: Bearer header automatically.
+                return Task.CompletedTask;
+            }
         };
     });
 

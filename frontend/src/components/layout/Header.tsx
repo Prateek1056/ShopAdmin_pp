@@ -1,3 +1,7 @@
+
+import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+
 import {
   Avatar,
   Button,
@@ -9,6 +13,7 @@ import {
   Layout,
   Space,
   Typography,
+  message,
   theme,
 } from "antd";
 
@@ -22,6 +27,8 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 
+import { logoutUser } from "../../features/auth/auth.api";
+
 function Header({
   collapsed,
   setCollapsed,
@@ -34,6 +41,29 @@ function Header({
   setIsDark: (value: boolean) => void;
 }) {
   const { token } = theme.useToken();
+  const navigate = useNavigate();
+
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+
+      await logoutUser();
+
+      message.success("Logged out successfully.");
+
+      await navigate({ to: "/login" });
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Unable to logout. Please try again."
+      );
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const profileContent = (
     <Card
@@ -50,12 +80,7 @@ function Header({
       <Flex vertical align="center" gap={10}>
         <Avatar size={80} src="/profile.jpg" icon={<UserOutlined />} />
 
-        <Typography.Title
-          level={5}
-          style={{
-            margin: 0,
-          }}
-        >
+        <Typography.Title level={5} style={{ margin: 0 }}>
           Prateek Sharma
         </Typography.Title>
 
@@ -113,13 +138,13 @@ function Header({
         type="text"
         block
         icon={<LogoutOutlined />}
+        loading={isLoggingOut}
+        disabled={isLoggingOut}
         style={{
           height: 44,
           justifyContent: "flex-start",
         }}
-        onClick={() => {
-          console.log("Logout");
-        }}
+        onClick={handleLogout}
       >
         Logout
       </Button>
@@ -175,9 +200,7 @@ function Header({
 
                 <Typography.Text
                   type="secondary"
-                  style={{
-                    fontSize: 12,
-                  }}
+                  style={{ fontSize: 12 }}
                 >
                   Admin
                 </Typography.Text>

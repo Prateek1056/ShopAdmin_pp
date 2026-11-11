@@ -58,10 +58,9 @@ namespace Net_Backend.Feature.Products.Controller
         }
 
 
-        [HttpPut("{id}")]
+        [HttpPost("Update")]
         public async Task<ApiResponse<bool>> Update(
-            string id,
-            [FromBody] UpdateProductRequestDto item)
+            [FromBody] UpdateProductRequestDto item)                        
         {
             var response = new ApiResponse<bool>();
 
@@ -70,7 +69,7 @@ namespace Net_Backend.Feature.Products.Controller
                 if (!ValidateModelState(response))
                     return response;
 
-                response = await _productServices.UpdateAsync(id, item, User);
+                response = await _productServices.UpdateAsync(item.Id, item, User);
             }
             catch (Exception ex)
             {
@@ -80,14 +79,19 @@ namespace Net_Backend.Feature.Products.Controller
             return response;
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ApiResponse<bool>> Delete(string id)
+        [HttpPost("Delete")]
+        public async Task<ApiResponse<bool>> Delete(
+            [FromBody] DeleteProductRequestDto item
+        )
         {
             var response = new ApiResponse<bool>();
 
             try
             {
-                response = await _productServices.DeleteAsync(id);
+                if (!ValidateModelState(response))
+                    return response;
+                    
+                response = await _productServices.DeleteAsync(item.Id);
             }
             catch (Exception ex)
             {
