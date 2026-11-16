@@ -1,5 +1,7 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿
+using Microsoft.IdentityModel.Tokens;
 using Net_Backend.Feature.Auth.DTO.Response;
+using Net_Backend.Feature.ApplicationUser.Model;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -9,9 +11,12 @@ namespace Net_Backend.Services.Authentication
 {
     public class JwtTokenService
     {
-        public AuthResponseDto GenerateToken(string userId, string userName)
+        public AuthResponseDto GenerateToken(
+            string userId,
+            string userName,
+            UserRole role)
         {
-            var accessToken = GenerateAccessToken(userId, userName);
+            var accessToken = GenerateAccessToken(userId, userName, role);
             var refreshToken = GenerateRefreshToken();
 
             return new AuthResponseDto
@@ -21,12 +26,16 @@ namespace Net_Backend.Services.Authentication
             };
         }
 
-        private string GenerateAccessToken(string userId, string userName)
+        private string GenerateAccessToken(
+            string userId,
+            string userName,
+            UserRole role)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim(ClaimTypes.Name, userName)
+                new Claim(ClaimTypes.Name, userName),
+                new Claim(ClaimTypes.Role, role.ToString())
             };
 
             var key = new SymmetricSecurityKey(

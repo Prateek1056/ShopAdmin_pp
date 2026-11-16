@@ -56,7 +56,8 @@ namespace Net_Backend.Feature.Auth.Services
 
                 var authResponse = _jwtTokenService.GenerateToken(
                     user.Id ?? string.Empty,
-                    user.Name ?? string.Empty
+                    user.Name ?? string.Empty,
+                    user.Role
                 );
 
                 response.Data = authResponse;

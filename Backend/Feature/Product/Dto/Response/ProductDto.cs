@@ -10,5 +10,6 @@ namespace Net_Backend.Feature.Products.Dto.Response
         public int StockQuantity { get; set; }
        
         public bool IsActive { get; set; }
+        public string ImageUrl { get; set; } = string.Empty;
     }
 }

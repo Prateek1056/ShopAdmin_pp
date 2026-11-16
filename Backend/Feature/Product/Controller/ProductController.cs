@@ -6,11 +6,13 @@ using Net_Backend.Feature.Products.Dto.Request;
 using Net_Backend.Feature.Products.Services;
 using Net_Backend.Feature.Products.Entity;
 using Net_Backend.Utilities;
+using Net_Backend.Feature.ApplicationUser.Model;
+using Net_Backend.Feature.Products.Dto.Response;
 
 namespace Net_Backend.Feature.Products.Controller
 {
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [ApiController]
     public class ProductController : ApiControllerBase
     {
@@ -21,6 +23,22 @@ namespace Net_Backend.Feature.Products.Controller
         {
             _productServices = new ProductServices(dbConfig);
         }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<ApiResponse<List<ProductDto>>> GetAll()
+        {
+            return await _productServices.GetAllAsync();
+        }
+
+        // Public endpoint: Retrieve a product by ID.
+        [AllowAnonymous]
+        [HttpGet("{id}")]
+        public async Task<ApiResponse<ProductDto>> GetById(string id)
+        {
+            return await _productServices.GetByIdAsync(id);
+        }
+
 
         [HttpPost]
         public async Task<ApiResponse<bool>> Create(
@@ -57,10 +75,9 @@ namespace Net_Backend.Feature.Products.Controller
             return response;
         }
 
-
         [HttpPost("Update")]
         public async Task<ApiResponse<bool>> Update(
-            [FromBody] UpdateProductRequestDto item)                        
+            [FromBody] UpdateProductRequestDto item)
         {
             var response = new ApiResponse<bool>();
 
@@ -90,7 +107,7 @@ namespace Net_Backend.Feature.Products.Controller
             {
                 if (!ValidateModelState(response))
                     return response;
-                    
+
                 response = await _productServices.DeleteAsync(item.Id);
             }
             catch (Exception ex)

@@ -51,6 +51,8 @@ namespace Net_Backend.Feature.Auth.Controller
                 {
                     response.Success = false;
                     response.Message = loginResponse.Message;
+                    response.Errors = loginResponse.Errors ?? new List<ApiError>();
+
                     return response;
                 }
 

@@ -76,7 +76,8 @@ namespace Net_Backend.Feature.Products.Services
                     Price = p.Price,
                     Category = p.Category,
                     StockQuantity = p.StockQuantity,
-                    IsActive = p.IsActive
+                    IsActive = p.IsActive,
+                    ImageUrl = p.ImageUrl,
                 }).ToList();
 
                 response.Success = true;
@@ -112,7 +113,8 @@ namespace Net_Backend.Feature.Products.Services
                     Price = product.Price,
                     Category = product.Category,
                     StockQuantity = product.StockQuantity,
-                    IsActive = product.IsActive
+                    IsActive = product.IsActive,
+                    ImageUrl = product.ImageUrl,
                 };
 
                 response.Success = true;

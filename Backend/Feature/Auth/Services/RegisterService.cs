@@ -54,7 +54,8 @@ namespace Net_Backend.Feature.Auth.Services
                     Phone = item.ContactNumber.Trim(),
                     Gender = item.Gender,
                     Address = item.Address,
-                    DateofBirth = item.DateofBirth
+                    DateofBirth = item.DateofBirth,
+                    Role = UserRole.User
                 };
 
                 response.Data = await _userDB.AddAsync(user);

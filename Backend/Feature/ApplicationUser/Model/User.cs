@@ -1,4 +1,4 @@
-
+﻿
 using Net_Backend.Common.Dto;
 using Net_Backend.Data;
 using System.ComponentModel.DataAnnotations;
@@ -32,7 +32,7 @@ namespace Net_Backend.Feature.ApplicationUser.Model
 
         public string ProfilePic { get; set; } = string.Empty;
 
-        public List<string> Roles { get; set; } = new();
+        public UserRole Role { get; set; } = UserRole.User;
 
         public LastLogin? LastLogin { get; set; }
     }
@@ -45,7 +45,7 @@ namespace Net_Backend.Feature.ApplicationUser.Model
 
         public string Browser { get; set; } = string.Empty;
     }
-    
+
     public enum Gender
     {
         Undefined = 0,
@@ -55,6 +55,12 @@ namespace Net_Backend.Feature.ApplicationUser.Model
 
         [Display(Name = "Female")]
         Female = 2
+    }
+
+    public enum UserRole
+    {
+        User = 1,
+        Admin = 2,
     }
 
     public class UserDB : RecordDB<User>
