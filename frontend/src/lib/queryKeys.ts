@@ -13,4 +13,7 @@ export const queryKeys = {
 
   // Orders
   ORDERS: "orders",
+
+  // Users
+  USERS: "users",
 } as const;

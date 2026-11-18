@@ -1,10 +1,10 @@
+
 import { useState } from "react";
-import { Layout } from "antd";
-import { ConfigProvider, theme } from "antd";
+import { Layout, ConfigProvider, theme } from "antd";
+import { Outlet } from "@tanstack/react-router";
 
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import Dashboard from "../pages/Dashboard";
 
 function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
@@ -27,12 +27,8 @@ function DashboardLayout() {
             setIsDark={setIsDark}
           />
 
-          <Layout.Content
-            style={{
-              padding: 16,
-            }}
-          >
-            <Dashboard />
+          <Layout.Content style={{ padding: 16 }}>
+            <Outlet />
           </Layout.Content>
         </Layout>
       </Layout>

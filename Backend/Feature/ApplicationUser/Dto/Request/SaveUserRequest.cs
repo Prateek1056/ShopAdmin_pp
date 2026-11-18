@@ -20,7 +20,7 @@ namespace Net_Backend.Feature.ApplicationUser.Dto.Request
 
         public AddressModel Address { get; set; } = new();
 
-        public DateTime DateofBirth { get; set; }
+        public DateTime? DateofBirth { get; set; }
 
         public UserRole Role { get; set; } = UserRole.User;
     }

@@ -117,7 +117,7 @@ namespace Net_Backend.Feature.ApplicationUser.Service
                         PasswordHash = _passwordService.HashPassword(item.Password),
                         Gender = item.Gender,
                         Address = item.Address ?? new(),
-                        DateofBirth = item.DateofBirth,
+                        DateofBirth = item.DateofBirth ?? DateTime.MinValue,
                         Role = item.Role,
                         IsActive = true,
                         IsDeleted = false
@@ -166,7 +166,7 @@ namespace Net_Backend.Feature.ApplicationUser.Service
                     user.Phone = item.ContactNumber.Trim();
                     user.Gender = item.Gender;
                     user.Address = item.Address ?? new();
-                    user.DateofBirth = item.DateofBirth;
+                    user.DateofBirth = item.DateofBirth ?? user.DateofBirth;
                     user.Role = item.Role;
 
                     // Only change password when a new one is provided.

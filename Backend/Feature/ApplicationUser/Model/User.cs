@@ -12,7 +12,6 @@ namespace Net_Backend.Feature.ApplicationUser.Model
 
         public string Email { get; set; } = string.Empty;
 
-        // Existing ShopAdmin fields — keep unchanged for now
         public string Phone { get; set; } = string.Empty;
 
         public string PasswordHash { get; set; } = string.Empty;
@@ -23,7 +22,6 @@ namespace Net_Backend.Feature.ApplicationUser.Model
 
         public DateTime DateofBirth { get; set; }
 
-        // Properties from your mentor's User entity
         public bool IsActive { get; set; } = true;
 
         public bool IsDeleted { get; set; } = false;

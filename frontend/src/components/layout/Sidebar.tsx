@@ -1,9 +1,12 @@
+
 import {
   Flex,
   Layout,
   Menu,
   Typography,
 } from "antd";
+
+import type { MenuProps } from "antd";
 
 import {
   DashboardOutlined,
@@ -15,7 +18,21 @@ import {
   QuestionCircleOutlined,
 } from "@ant-design/icons";
 
+import {
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
+
 function Sidebar({ collapsed }: { collapsed: boolean }) {
+  // Router navigation
+  const navigate = useNavigate();
+
+  // Get current URL
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+
+  // Sidebar menu items
   const mainItems = [
     {
       key: "dashboard",
@@ -52,6 +69,36 @@ function Sidebar({ collapsed }: { collapsed: boolean }) {
     },
   ];
 
+  // Determine selected menu item from current URL
+  const selectedKey = pathname.startsWith("/dashboard/users")
+    ? "users"
+    : pathname.startsWith("/dashboard/products")
+      ? "products"
+      : pathname.startsWith("/dashboard/orders")
+        ? "orders"
+        : "dashboard";
+
+  // Handle sidebar navigation
+  const handleMenuClick: MenuProps["onClick"] = ({ key }) => {
+    switch (key) {
+      case "dashboard":
+        void navigate({ to: "/dashboard" });
+        break;
+
+      case "products":
+        void navigate({ to: "/dashboard/products" });
+        break;
+
+      case "orders":
+        void navigate({ to: "/dashboard/orders" });
+        break;
+
+      case "users":
+        void navigate({ to: "/dashboard/users" });
+        break;
+    }
+  };
+
   return (
     <Layout.Sider
       width={240}
@@ -71,6 +118,7 @@ function Sidebar({ collapsed }: { collapsed: boolean }) {
           height: "100%",
         }}
       >
+        {/* Logo */}
         <Flex
           align="center"
           justify={collapsed ? "center" : "flex-start"}
@@ -101,16 +149,19 @@ function Sidebar({ collapsed }: { collapsed: boolean }) {
           )}
         </Flex>
 
+        {/* Main Navigation */}
         <Menu
           mode="inline"
           items={mainItems}
-          defaultSelectedKeys={["dashboard"]}
+          selectedKeys={[selectedKey]}
+          onClick={handleMenuClick}
           style={{
             border: "none",
             flex: 1,
           }}
         />
 
+        {/* Bottom Navigation */}
         <Menu
           mode="inline"
           items={bottomItems}
