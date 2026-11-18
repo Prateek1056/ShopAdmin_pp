@@ -1,16 +1,11 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { saveUser, deleteUser } from "./users.api";
-import type {
-  SaveUserRequest,
-  DeleteUserRequest,
-} from "./users.types";
+import type { SaveUserRequest, DeleteUserRequest } from "./users.types";
 import { queryKeys } from "../../lib/queryKeys";
+import queryClient from "../../lib/queryClient";
 
 export function useSaveUserMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (details: SaveUserRequest) => saveUser(details),
 
@@ -23,8 +18,6 @@ export function useSaveUserMutation() {
 }
 
 export function useDeleteUserMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (details: DeleteUserRequest) => deleteUser(details),
 
