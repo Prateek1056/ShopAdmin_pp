@@ -3,8 +3,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 import Cookies from "js-cookie";
-import type { ApiError, ApiResponse } from "../types/api.type";
-
+import { ApiError, type ApiResponse } from "../types/api.type";
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }

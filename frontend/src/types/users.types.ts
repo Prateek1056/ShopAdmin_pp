@@ -34,7 +34,7 @@ export interface UserDto {
   phone: string;
   gender: Gender;
   address: AddressDto;
-  dateofBirth: string;
+  dateofBirth: string | null;
   role: UserRole;
   isActive: boolean;
 }
@@ -48,24 +48,11 @@ export interface SaveUserRequest {
   password: string;
   gender: Gender;
   address: AddressDto;
-  dateofBirth: string;
+  dateofBirth: string | null;
   role: UserRole;
 }
 
 // Request body for deleting a user
 export interface DeleteUserRequest {
   id: string;
-}
-
-// API error structure
-export interface ApiError {
-  message: string;
-}
-
-// Generic API response
-export interface ApiResponse<T> {
-  success: boolean;
-  message: string | null;
-  data: T;
-  errors: ApiError[];
 }

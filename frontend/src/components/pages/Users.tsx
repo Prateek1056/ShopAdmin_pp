@@ -1,6 +1,11 @@
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
+import { useGetUsers, useSaveUser } from "../../Services/user.services";
+
+import type { UserDto, SaveUserRequest } from "../../types/users.types";
+import { Gender, UserRole } from "../../types/users.types";
+
 import {
   Alert,
   Button,
@@ -15,15 +20,8 @@ import {
   Tag,
   Typography,
 } from "antd";
-import type { TableColumnsType } from "antd";
 
-import { usersQueryOptions } from "../../features/users/users.queries";
-import { useSaveUserMutation } from "../../features/users/users.mutations";
-import type {
-  UserDto,
-  SaveUserRequest,
-} from "../../features/users/users.types";
-import { Gender, UserRole } from "../../features/users/users.types";
+import type { TableColumnsType } from "antd";
 
 type AddUserFormValues = {
   name: string;
@@ -75,21 +73,24 @@ const columns: TableColumnsType<UserDto> = [
 
 function Users() {
   const [searchText, setSearchText] = useState("");
-  const [selectedRole, setSelectedRole] =
-    useState<UserDto["role"] | undefined>();
+
+  const [selectedRole, setSelectedRole] = useState<
+    UserDto["role"] | undefined
+  >();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const [form] = Form.useForm<AddUserFormValues>();
 
-  const saveUserMutation = useSaveUserMutation();
+  // React Query hooks from user.services.ts
+  const saveUserMutation = useSaveUser();
 
   const {
     data: users = [],
     isLoading,
     isError,
     error,
-  } = useQuery(usersQueryOptions());
+  } = useGetUsers();
 
   const filteredUsers = users.filter((user) => {
     const search = searchText.toLowerCase();
@@ -113,7 +114,6 @@ function Users() {
       password: values.password,
       role: values.role,
 
-      // Default values for details not collected yet.
       gender: Gender.Undefined,
       dateofBirth: null,
       address: {
@@ -127,9 +127,9 @@ function Users() {
     };
 
     try {
-      const response = await saveUserMutation.mutateAsync(userDetails);
+      await saveUserMutation.mutateAsync(userDetails);
 
-      message.success(response.message || "User created successfully.");
+      message.success("User created successfully.");
 
       form.resetFields();
       setIsDrawerOpen(false);
@@ -146,14 +146,8 @@ function Users() {
   };
 
   return (
-    <Space
-      orientation="vertical"
-      size="large"
-      style={{ width: "100%" }}
-    >
-      <Typography.Title level={3}>
-        User Management
-      </Typography.Title>
+    <Space orientation="vertical" size="large" style={{ width: "100%" }}>
+      <Typography.Title level={3}>User Management</Typography.Title>
 
       {isError && (
         <Alert
@@ -161,9 +155,7 @@ function Users() {
           showIcon
           message="Failed to load users"
           description={
-            error instanceof Error
-              ? error.message
-              : "Something went wrong."
+            error instanceof Error ? error.message : "Something went wrong."
           }
         />
       )}
@@ -226,9 +218,7 @@ function Users() {
         destroyOnHidden
         extra={
           <Space>
-            <Button onClick={handleDrawerClose}>
-              Cancel
-            </Button>
+            <Button onClick={handleDrawerClose}>Cancel</Button>
 
             <Button
               type="primary"
