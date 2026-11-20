@@ -9,7 +9,7 @@ interface RetryableRequestConfig extends InternalAxiosRequestConfig {
 }
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5029/api",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",

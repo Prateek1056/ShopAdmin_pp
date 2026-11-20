@@ -10,22 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
-import { Route as DashboardOrdersRouteImport } from './routes/dashboard.orders'
-import { Route as DashboardProductsRouteImport } from './routes/dashboard.products'
-import { Route as DashboardUsersRouteImport } from './routes/dashboard.users'
+import { Route as ProtectedDashboardRouteImport } from './routes/_protected.dashboard'
+import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected.dashboard.index'
+import { Route as ProtectedDashboardOrdersRouteImport } from './routes/_protected.dashboard.orders'
+import { Route as ProtectedDashboardProductsRouteImport } from './routes/_protected.dashboard.products'
+import { Route as ProtectedDashboardUsersRouteImport } from './routes/_protected.dashboard.users'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const ProtectedRoute = ProtectedRouteImport.update({
+  id: '/_protected',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -38,64 +38,72 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardIndexRoute = DashboardIndexRouteImport.update({
+const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => DashboardRoute,
+  getParentRoute: () => ProtectedDashboardRoute,
 } as any)
-const DashboardOrdersRoute = DashboardOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardProductsRoute = DashboardProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardUsersRoute = DashboardUsersRouteImport.update({
+const ProtectedDashboardOrdersRoute =
+  ProtectedDashboardOrdersRouteImport.update({
+    id: '/orders',
+    path: '/orders',
+    getParentRoute: () => ProtectedDashboardRoute,
+  } as any)
+const ProtectedDashboardProductsRoute =
+  ProtectedDashboardProductsRouteImport.update({
+    id: '/products',
+    path: '/products',
+    getParentRoute: () => ProtectedDashboardRoute,
+  } as any)
+const ProtectedDashboardUsersRoute = ProtectedDashboardUsersRouteImport.update({
   id: '/users',
   path: '/users',
-  getParentRoute: () => DashboardRoute,
+  getParentRoute: () => ProtectedDashboardRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/dashboard/orders': typeof DashboardOrdersRoute
-  '/dashboard/products': typeof DashboardProductsRoute
-  '/dashboard/users': typeof DashboardUsersRoute
-  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard': typeof ProtectedDashboardRouteWithChildren
+  '/dashboard/orders': typeof ProtectedDashboardOrdersRoute
+  '/dashboard/products': typeof ProtectedDashboardProductsRoute
+  '/dashboard/users': typeof ProtectedDashboardUsersRoute
+  '/dashboard/': typeof ProtectedDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/dashboard/orders': typeof DashboardOrdersRoute
-  '/dashboard/products': typeof DashboardProductsRoute
-  '/dashboard/users': typeof DashboardUsersRoute
-  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/orders': typeof ProtectedDashboardOrdersRoute
+  '/dashboard/products': typeof ProtectedDashboardProductsRoute
+  '/dashboard/users': typeof ProtectedDashboardUsersRoute
+  '/dashboard': typeof ProtectedDashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteWithChildren
+  '/_protected': typeof ProtectedRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/dashboard/orders': typeof DashboardOrdersRoute
-  '/dashboard/products': typeof DashboardProductsRoute
-  '/dashboard/users': typeof DashboardUsersRoute
-  '/dashboard/': typeof DashboardIndexRoute
+  '/_protected/dashboard': typeof ProtectedDashboardRouteWithChildren
+  '/_protected/dashboard/orders': typeof ProtectedDashboardOrdersRoute
+  '/_protected/dashboard/products': typeof ProtectedDashboardProductsRoute
+  '/_protected/dashboard/users': typeof ProtectedDashboardUsersRoute
+  '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
     | '/login'
     | '/register'
+    | '/dashboard'
     | '/dashboard/orders'
     | '/dashboard/products'
     | '/dashboard/users'
@@ -112,18 +120,19 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/dashboard'
+    | '/_protected'
     | '/login'
     | '/register'
-    | '/dashboard/orders'
-    | '/dashboard/products'
-    | '/dashboard/users'
-    | '/dashboard/'
+    | '/_protected/dashboard'
+    | '/_protected/dashboard/orders'
+    | '/_protected/dashboard/products'
+    | '/_protected/dashboard/users'
+    | '/_protected/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRouteWithChildren
+  ProtectedRoute: typeof ProtectedRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
 }
@@ -137,11 +146,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/_protected': {
+      id: '/_protected'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ProtectedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -158,58 +167,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/': {
-      id: '/dashboard/'
+    '/_protected/dashboard': {
+      id: '/_protected/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof ProtectedDashboardRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/dashboard/': {
+      id: '/_protected/dashboard/'
       path: '/'
       fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof DashboardRoute
+      preLoaderRoute: typeof ProtectedDashboardIndexRouteImport
+      parentRoute: typeof ProtectedDashboardRoute
     }
-    '/dashboard/orders': {
-      id: '/dashboard/orders'
+    '/_protected/dashboard/orders': {
+      id: '/_protected/dashboard/orders'
       path: '/orders'
       fullPath: '/dashboard/orders'
-      preLoaderRoute: typeof DashboardOrdersRouteImport
-      parentRoute: typeof DashboardRoute
+      preLoaderRoute: typeof ProtectedDashboardOrdersRouteImport
+      parentRoute: typeof ProtectedDashboardRoute
     }
-    '/dashboard/products': {
-      id: '/dashboard/products'
+    '/_protected/dashboard/products': {
+      id: '/_protected/dashboard/products'
       path: '/products'
       fullPath: '/dashboard/products'
-      preLoaderRoute: typeof DashboardProductsRouteImport
-      parentRoute: typeof DashboardRoute
+      preLoaderRoute: typeof ProtectedDashboardProductsRouteImport
+      parentRoute: typeof ProtectedDashboardRoute
     }
-    '/dashboard/users': {
-      id: '/dashboard/users'
+    '/_protected/dashboard/users': {
+      id: '/_protected/dashboard/users'
       path: '/users'
       fullPath: '/dashboard/users'
-      preLoaderRoute: typeof DashboardUsersRouteImport
-      parentRoute: typeof DashboardRoute
+      preLoaderRoute: typeof ProtectedDashboardUsersRouteImport
+      parentRoute: typeof ProtectedDashboardRoute
     }
   }
 }
 
-interface DashboardRouteChildren {
-  DashboardOrdersRoute: typeof DashboardOrdersRoute
-  DashboardProductsRoute: typeof DashboardProductsRoute
-  DashboardUsersRoute: typeof DashboardUsersRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
+interface ProtectedDashboardRouteChildren {
+  ProtectedDashboardOrdersRoute: typeof ProtectedDashboardOrdersRoute
+  ProtectedDashboardProductsRoute: typeof ProtectedDashboardProductsRoute
+  ProtectedDashboardUsersRoute: typeof ProtectedDashboardUsersRoute
+  ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
 }
 
-const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardOrdersRoute: DashboardOrdersRoute,
-  DashboardProductsRoute: DashboardProductsRoute,
-  DashboardUsersRoute: DashboardUsersRoute,
-  DashboardIndexRoute: DashboardIndexRoute,
+const ProtectedDashboardRouteChildren: ProtectedDashboardRouteChildren = {
+  ProtectedDashboardOrdersRoute: ProtectedDashboardOrdersRoute,
+  ProtectedDashboardProductsRoute: ProtectedDashboardProductsRoute,
+  ProtectedDashboardUsersRoute: ProtectedDashboardUsersRoute,
+  ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
 }
 
-const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
-  DashboardRouteChildren,
+const ProtectedDashboardRouteWithChildren =
+  ProtectedDashboardRoute._addFileChildren(ProtectedDashboardRouteChildren)
+
+interface ProtectedRouteChildren {
+  ProtectedDashboardRoute: typeof ProtectedDashboardRouteWithChildren
+}
+
+const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedDashboardRoute: ProtectedDashboardRouteWithChildren,
+}
+
+const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
+  ProtectedRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRouteWithChildren,
+  ProtectedRoute: ProtectedRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
 }

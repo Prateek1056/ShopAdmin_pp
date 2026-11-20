@@ -11,7 +11,7 @@ import type {
   DeleteUserRequest,
 } from "../types/users.types";
 
-const route = "/api/User";
+const route = "/User";
 
 // GET ALL USERS
 export const useGetUsers = () =>
@@ -27,7 +27,7 @@ export const useGetUser = (id?: string) =>
     queryKey: [queryKeys.USERS, id],
     queryFn: async () =>
       await ApiUtility.get<UserDto>(
-        `${route}/GetById/${encodeURIComponent(id!)}`
+        `${route}/GetById/${id}`
       ),
     enabled: !!id,
   });
