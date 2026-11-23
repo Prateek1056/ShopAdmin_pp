@@ -7,7 +7,7 @@ namespace Net_Backend.Data
         private readonly IMongoDatabase _database;
 
         public MongoDBContext(DBConfiguration dbConfig)
-        {
+        {   
             var client = new MongoClient(dbConfig.ConnectionString);
 
             _database = client.GetDatabase(dbConfig.Database);

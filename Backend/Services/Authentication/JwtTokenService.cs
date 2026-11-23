@@ -1,6 +1,5 @@
 ﻿
 using Microsoft.IdentityModel.Tokens;
-using Net_Backend.Feature.Auth.DTO.Response;
 using Net_Backend.Feature.ApplicationUser.Model;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,22 +10,13 @@ namespace Net_Backend.Services.Authentication
 {
     public class JwtTokenService
     {
-        public AuthResponseDto GenerateToken(
-            string userId,
-            string userName,
-            UserRole role)
-        {
-            var accessToken = GenerateAccessToken(userId, userName, role);
-            var refreshToken = GenerateRefreshToken();
+        public static readonly TimeSpan AccessTokenLifetime =
+            TimeSpan.FromMinutes(15);
 
-            return new AuthResponseDto
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
-            };
-        }
+        public static readonly TimeSpan RefreshTokenLifetime =
+            TimeSpan.FromDays(7);
 
-        private string GenerateAccessToken(
+        public string GenerateAccessToken(
             string userId,
             string userName,
             UserRole role)
@@ -50,17 +40,27 @@ namespace Net_Backend.Services.Authentication
             var token = new JwtSecurityToken(
                 issuer: AppConfig.Current.Jwt.Issuer,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(15),
+                expires: DateTime.UtcNow.Add(AccessTokenLifetime),
                 signingCredentials: credentials
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private string GenerateRefreshToken()
+        public string GenerateRefreshToken()
         {
             var randomBytes = RandomNumberGenerator.GetBytes(64);
+
             return Convert.ToBase64String(randomBytes);
+        }
+
+        public string HashRefreshToken(string refreshToken)
+        {
+            var tokenBytes = Encoding.UTF8.GetBytes(refreshToken);
+
+            var hashBytes = SHA256.HashData(tokenBytes);
+
+            return Convert.ToHexString(hashBytes);
         }
     }
 }

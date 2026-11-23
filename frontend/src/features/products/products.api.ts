@@ -1,13 +1,29 @@
 
-import { apiRequest } from "../../lib/apiClient";
-import type { ApiResponse, Product } from "./products.types";
+import { apiRequest } from "../../lib/apiUtility";
 
-export const getProducts = async (): Promise<ApiResponse<Product[]>> => {
-  return apiRequest<ApiResponse<Product[]>>("/Product");
+import type {
+  ApiResponse,
+  Product,
+} from "./products.types";
+
+export const getProducts = async (): Promise<
+  ApiResponse<Product[]>
+> => {
+  return apiRequest<ApiResponse<Product[]>>(
+    "/Product",
+    {
+      method: "GET",
+    },
+  );
 };
 
 export const getProductById = async (
-  id: string
+  id: string,
 ): Promise<ApiResponse<Product>> => {
-  return apiRequest<ApiResponse<Product>>(`/Product/${id}`);
+  return apiRequest<ApiResponse<Product>>(
+    `/Product/${id}`,
+    {
+      method: "GET",
+    },
+  );
 };

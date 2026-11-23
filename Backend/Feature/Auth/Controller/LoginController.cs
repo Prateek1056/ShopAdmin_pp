@@ -17,6 +17,7 @@ namespace Net_Backend.Feature.Auth.Controller
     public class LoginController : ApiControllerBase
     {
         private readonly LoginService _loginService;
+        private readonly AuthServices _authServices;
         private readonly IWebHostEnvironment _environment;
 
         public LoginController(
@@ -26,14 +27,21 @@ namespace Net_Backend.Feature.Auth.Controller
             IWebHostEnvironment environment)
             : base(dbConfig)
         {
+            _authServices = new AuthServices(
+                dbConfig,
+                jwtTokenService
+            );
+
             _loginService = new LoginService(
                 dbConfig,
                 passwordService,
-                jwtTokenService);
+                _authServices
+            );
 
             _environment = environment;
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ApiResponse<bool>> Login(
             [FromBody] LoginRequestDto item)
@@ -47,42 +55,18 @@ namespace Net_Backend.Feature.Auth.Controller
 
                 var loginResponse = await _loginService.Login(item);
 
-                if (!loginResponse.Success || loginResponse.Data == null)
+                if (!loginResponse.Success ||
+                    loginResponse.Data == null)
                 {
                     response.Success = false;
                     response.Message = loginResponse.Message;
-                    response.Errors = loginResponse.Errors ?? new List<ApiError>();
+                    response.Errors =
+                        loginResponse.Errors ?? new List<ApiError>();
 
                     return response;
                 }
 
-                var tokens = loginResponse.Data;
-
-                var isSecure = !_environment.IsDevelopment() || Request.IsHttps;
-
-                Response.Cookies.Append(
-                    "accessToken",
-                    tokens.AccessToken,
-                    new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = isSecure,
-                        SameSite = SameSiteMode.Lax,
-                        Path = "/",
-                        Expires = DateTimeOffset.UtcNow.AddMinutes(15)
-                    });
-
-                Response.Cookies.Append(
-                    "refreshToken",
-                    tokens.RefreshToken,
-                    new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = isSecure,
-                        SameSite = SameSiteMode.Lax,
-                        Path = "/",
-                        Expires = DateTimeOffset.UtcNow.AddDays(7)
-                    });
+                SetAuthCookies(loginResponse.Data);
 
                 response.Success = true;
                 response.Message = "Login successful";
@@ -96,26 +80,54 @@ namespace Net_Backend.Feature.Auth.Controller
             return response;
         }
 
-        // Logout API
+        [AllowAnonymous]
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh()
+        {
+            var refreshToken =
+                Request.Cookies["refreshToken"];
+
+            var tokens = await _authServices.RefreshAsync(
+                refreshToken
+            );
+
+            if (tokens == null)
+            {
+                DeleteAuthCookies();
+
+                var response = new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = "Invalid or expired refresh token.",
+                    Data = false
+                };
+
+                return Unauthorized(response);
+            }
+
+            SetAuthCookies(tokens);
+
+            return Ok(new ApiResponse<bool>
+            {
+                Success = true,
+                Message = "Token refreshed successfully.",
+                Data = true
+            });
+        }
+
+        [AllowAnonymous]
         [HttpPost("logout")]
-        public ApiResponse<bool> Logout()
+        public async Task<ApiResponse<bool>> Logout()
         {
             var response = new ApiResponse<bool>();
 
             try
             {
-                var isSecure = !_environment.IsDevelopment() || Request.IsHttps;
+                await _authServices.LogoutAsync(
+                    Request.Cookies["refreshToken"]
+                );
 
-                var cookieOptions = new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = isSecure,
-                    SameSite = SameSiteMode.Lax,
-                    Path = "/"
-                };
-
-                Response.Cookies.Delete("accessToken", cookieOptions);
-                Response.Cookies.Delete("refreshToken", cookieOptions);
+                DeleteAuthCookies();
 
                 response.Success = true;
                 response.Message = "Logout successful";
@@ -137,10 +149,14 @@ namespace Net_Backend.Feature.Auth.Controller
 
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userId = User.FindFirst(
+                    ClaimTypes.NameIdentifier
+                )?.Value;
+
                 var userName = User.Identity?.Name;
 
-                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userName))
+                if (string.IsNullOrEmpty(userId) ||
+                    string.IsNullOrEmpty(userName))
                 {
                     response.Success = false;
                     response.Message = "User information not found";
@@ -163,6 +179,59 @@ namespace Net_Backend.Feature.Auth.Controller
             }
 
             return response;
+        }
+
+        private void SetAuthCookies(AuthResponseDto tokens)
+        {
+            var isSecure =
+                !_environment.IsDevelopment() || Request.IsHttps;
+
+            Response.Cookies.Append(
+                "accessToken",
+                tokens.AccessToken,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = isSecure,
+                    SameSite = SameSiteMode.Lax,
+                    Path = "/",
+                    Expires = DateTimeOffset.UtcNow.Add(
+                        JwtTokenService.AccessTokenLifetime
+                    )
+                }
+            );
+
+            Response.Cookies.Append(
+                "refreshToken",
+                tokens.RefreshToken,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = isSecure,
+                    SameSite = SameSiteMode.Lax,
+                    Path = "/",
+                    Expires = DateTimeOffset.UtcNow.Add(
+                        JwtTokenService.RefreshTokenLifetime
+                    )
+                }
+            );
+        }
+
+        private void DeleteAuthCookies()
+        {
+            var isSecure =
+                !_environment.IsDevelopment() || Request.IsHttps;
+
+            var options = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = isSecure,
+                SameSite = SameSiteMode.Lax,
+                Path = "/"
+            };
+
+            Response.Cookies.Delete("accessToken", options);
+            Response.Cookies.Delete("refreshToken", options);
         }
     }
 }

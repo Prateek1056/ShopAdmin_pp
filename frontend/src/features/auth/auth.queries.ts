@@ -2,7 +2,7 @@
 import { queryOptions } from "@tanstack/react-query";
 
 import { getCurrentUser } from "./auth.api";
-import { ApiRequestError } from "../../lib/apiClient";
+import { ApiError } from "../../types/api.type";
 import { queryKeys } from "../../lib/queryKeys";
 
 export const authQueryOptions = () =>
@@ -12,11 +12,12 @@ export const authQueryOptions = () =>
     queryFn: async () => {
       try {
         const response = await getCurrentUser();
+
         return response.data;
       } catch (error) {
         if (
-          error instanceof ApiRequestError &&
-          error.status === 401
+          error instanceof ApiError &&
+          error.statusCode === 401
         ) {
           return null;
         }
@@ -27,3 +28,4 @@ export const authQueryOptions = () =>
 
     retry: false,
   });
+  

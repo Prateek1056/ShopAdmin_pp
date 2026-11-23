@@ -10,6 +10,7 @@ using Net_Backend.Feature.Products.Services;
 using Net_Backend.Middleware.ReqContext;
 using Net_Backend.Services.Authentication;
 using System.Text;
+using Net_Backend.Feature.Auth.Entity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -97,6 +98,13 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// Create required MongoDB indexes for login sessions.
+var dbConfig = app.Services.GetRequiredService<DBConfiguration>();
+
+var loginSessionDB = new LoginSessionDB(dbConfig);
+
+await loginSessionDB.EnsureIndexesAsync();
 
 app.UseDefaultFiles();
 app.MapStaticAssets();

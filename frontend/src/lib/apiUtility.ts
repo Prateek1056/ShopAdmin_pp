@@ -1,115 +1,151 @@
+
 import axios, {
   type AxiosRequestConfig,
   type InternalAxiosRequestConfig,
 } from "axios";
-import Cookies from "js-cookie";
-import { ApiError, type ApiResponse } from "../types/api.type";
-interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+
+import {
+  ApiError,
+  type ApiResponse,
+} from "../types/api.type";
+
+interface RetryableRequestConfig
+  extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5029/api",
+  baseURL:
+    import.meta.env.VITE_API_BASE_URL ||
+    "http://localhost:5029/api",
+
   withCredentials: true,
+
   headers: {
     "Content-Type": "application/json",
+    Accept: "application/json",
   },
 });
-
-// Attaches the access token (if present) to every outgoing request.
-axiosInstance.interceptors.request.use((config) => {
-  const token = Cookies.get("accessToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-let isRefreshing = false;
-let refreshSubscribers: Array<() => void> = [];
-
-function subscribeTokenRefresh(callback: () => void) {
-  refreshSubscribers.push(callback);
-}
-
-function onRefreshed() {
-  refreshSubscribers.forEach((cb) => cb());
-  refreshSubscribers = [];
-}
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (!axios.isAxiosError(error) || !error.config) {
-      return Promise.reject(error);
-    }
-
-    const originalRequest = error.config as RetryableRequestConfig;
-    const isAuthEndpoint =
-      originalRequest.url?.includes("/auth/login") ||
-      originalRequest.url?.includes("/auth/refresh");
-
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      !isAuthEndpoint
-    ) {
-      originalRequest._retry = true;
-
-      if (isRefreshing) {
-        return new Promise((resolve) => {
-          subscribeTokenRefresh(() => {
-            resolve(axiosInstance(originalRequest));
-          });
-        });
-      }
-
-      isRefreshing = true;
-
-      try {
-        await axiosInstance.post("/auth/refresh");
-        isRefreshing = false;
-        onRefreshed();
-        return axiosInstance(originalRequest);
-      } catch (refreshError) {
-        isRefreshing = false;
-        refreshSubscribers = [];
-        Cookies.remove("accessToken");
-        window.location.href = "/login";
-        return Promise.reject(refreshError);
-      }
-    }
-
-    return Promise.reject(error);
-  },
-);
-
-function unwrap<T>(response: { data: ApiResponse<T> }): T {
-  const body = response.data;
-  if (!body.success) {
-    throw new ApiError(body.message, 200, body.errors);
-  }
-  return body.data as T;
-}
 
 function toApiError(error: unknown): ApiError {
-  if (axios.isAxiosError(error)) {
-    const body = error.response?.data as ApiResponse<null> | undefined;
-    const status = error.response?.status ?? 500;
-    const message = body?.message ?? error.message ?? "Something went wrong";
-    return new ApiError(message, status, body?.errors ?? null);
+  // IMPORTANT: Preserve an ApiError that was already converted.
+  if (error instanceof ApiError) {
+    return error;
   }
+
+  if (axios.isAxiosError(error)) {
+    const body = error.response?.data as
+      | ApiResponse<unknown>
+      | undefined;
+
+    return new ApiError(
+      body?.message || error.message || "Something went wrong",
+      error.response?.status ?? 500,
+      body?.errors ?? null,
+    );
+  }
+
   return new ApiError("Something went wrong", 500);
 }
 
-export const ApiUtility = {
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    try {
-      const response = await axiosInstance.get<ApiResponse<T>>(url, config);
-      return unwrap(response);
-    } catch (error) {
-      throw toApiError(error);
+// Shared refresh request for simultaneous 401 responses.
+let refreshPromise: Promise<void> | null = null;
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+
+  async (error: unknown) => {
+    if (!axios.isAxiosError(error) || !error.config) {
+      return Promise.reject(toApiError(error));
     }
+
+    const originalRequest =
+      error.config as RetryableRequestConfig;
+
+    const url = originalRequest.url?.toLowerCase() ?? "";
+
+    const isLoginEndpoint = url.endsWith("/login");
+    const isRefreshEndpoint = url.endsWith("/login/refresh");
+    const isLogoutEndpoint = url.endsWith("/login/logout");
+
+    const isAuthEndpoint =
+      isLoginEndpoint ||
+      isRefreshEndpoint ||
+      isLogoutEndpoint;
+
+    if (
+      error.response?.status !== 401 ||
+      originalRequest._retry ||
+      isAuthEndpoint
+    ) {
+      return Promise.reject(toApiError(error));
+    }
+
+    originalRequest._retry = true;
+
+    try {
+      if (!refreshPromise) {
+        refreshPromise = axiosInstance
+          .post("/Login/refresh")
+          .then(() => undefined)
+          .finally(() => {
+            refreshPromise = null;
+          });
+      }
+
+      await refreshPromise;
+
+      // Retry the original request after successful refresh.
+      return axiosInstance(originalRequest);
+    } catch (refreshError) {
+      return Promise.reject(toApiError(refreshError));
+    }
+  },
+);
+
+// Raw API request: preserves the backend ApiResponse<T>.
+export async function apiRequest<T>(
+  url: string,
+  config: AxiosRequestConfig = {},
+): Promise<T> {
+  try {
+    const response = await axiosInstance.request<T>({
+      url,
+      ...config,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw toApiError(error);
+  }
+}
+
+function unwrap<T>(body: ApiResponse<T>): T {
+  if (!body.success) {
+    throw new ApiError(
+      body.message || "Request failed",
+      200,
+      body.errors ?? null,
+    );
+  }
+
+  return body.data as T;
+}
+
+export const ApiUtility = {
+  async get<T>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
+    const response = await apiRequest<ApiResponse<T>>(
+      url,
+      {
+        ...config,
+        method: "GET",
+      },
+    );
+
+    return unwrap(response);
   },
 
   async post<T>(
@@ -117,16 +153,16 @@ export const ApiUtility = {
     data?: unknown,
     config?: AxiosRequestConfig,
   ): Promise<T> {
-    try {
-      const response = await axiosInstance.post<ApiResponse<T>>(
-        url,
+    const response = await apiRequest<ApiResponse<T>>(
+      url,
+      {
+        ...config,
+        method: "POST",
         data,
-        config,
-      );
-      return unwrap(response);
-    } catch (error) {
-      throw toApiError(error);
-    }
+      },
+    );
+
+    return unwrap(response);
   },
 };
 

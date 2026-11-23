@@ -3,9 +3,11 @@ using Net_Backend.Common.Dto;
 using Net_Backend.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Net_Backend.Feature.ApplicationUser.Model
 {
+    [BsonIgnoreExtraElements]
     public class User : Record
     {
         public string Name { get; set; } = string.Empty;
@@ -25,8 +27,6 @@ namespace Net_Backend.Feature.ApplicationUser.Model
         public bool IsActive { get; set; } = true;
 
         public bool IsDeleted { get; set; } = false;
-
-        public string RefreshToken { get; set; } = string.Empty;
 
         public string ProfilePic { get; set; } = string.Empty;
 

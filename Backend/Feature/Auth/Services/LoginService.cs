@@ -1,3 +1,4 @@
+
 using Net_Backend.Data;
 using Net_Backend.Feature.ApplicationUser.Model;
 using Net_Backend.Feature.Auth.DTO.Request;
@@ -10,23 +11,26 @@ namespace Net_Backend.Feature.Auth.Services
 {
     public class LoginService
     {
-        private readonly DBConfiguration _dbConfig;
         private readonly UserDB _userDB;
         private readonly PasswordService _passwordService;
-        private readonly JwtTokenService _jwtTokenService;
+        private readonly AuthServices _authServices;
 
         public LoginService(
             DBConfiguration dbConfig,
             PasswordService passwordService,
-            JwtTokenService jwtTokenService)
+            AuthServices authServices)
         {
-            _dbConfig = dbConfig;
-            _userDB = new UserDB(dbConfig, RequestUser.Principal);
+            _userDB = new UserDB(
+                dbConfig,
+                RequestUser.Principal
+            );
+
             _passwordService = passwordService;
-            _jwtTokenService = jwtTokenService;
+            _authServices = authServices;
         }
 
-        public async Task<ApiResponse<AuthResponseDto>> Login(LoginRequestDto item)
+        public async Task<ApiResponse<AuthResponseDto>> Login(
+            LoginRequestDto item)
         {
             var response = new ApiResponse<AuthResponseDto>();
 
@@ -36,29 +40,41 @@ namespace Net_Backend.Feature.Auth.Services
                     string.IsNullOrWhiteSpace(item.Email) ||
                     string.IsNullOrWhiteSpace(item.Password))
                 {
-                    return response.ErrorResponse("Invalid email or password.");
+                    return response.ErrorResponse(
+                        "Invalid email or password."
+                    );
                 }
 
                 var email = item.Email.Trim().ToLowerInvariant();
 
-                var user = await _userDB.GetAsync(x => x.Email == email);
-
-                if (user == null)
-                    return response.ErrorResponse("Invalid email or password.");
-
-                var isPasswordValid = _passwordService.VerifyPassword(
-                    item.Password,
-                    user.PasswordHash
+                var user = await _userDB.GetAsync(
+                    x => x.Email == email
                 );
+
+                if (user == null ||
+                    !user.IsActive ||
+                    user.IsDeleted)
+                {
+                    return response.ErrorResponse(
+                        "Invalid email or password."
+                    );
+                }
+
+                var isPasswordValid =
+                    _passwordService.VerifyPassword(
+                        item.Password,
+                        user.PasswordHash
+                    );
 
                 if (!isPasswordValid)
-                    return response.ErrorResponse("Invalid email or password.");
+                {
+                    return response.ErrorResponse(
+                        "Invalid email or password."
+                    );
+                }
 
-                var authResponse = _jwtTokenService.GenerateToken(
-                    user.Id ?? string.Empty,
-                    user.Name ?? string.Empty,
-                    user.Role
-                );
+                var authResponse =
+                    await _authServices.IssueTokensAsync(user);
 
                 response.Data = authResponse;
                 response.Success = true;

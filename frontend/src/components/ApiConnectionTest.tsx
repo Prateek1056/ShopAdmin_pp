@@ -1,4 +1,7 @@
+
 import { useEffect, useState } from "react";
+
+import { axiosInstance } from "../lib/apiUtility";
 
 interface ApiResponse {
   message: string;
@@ -7,19 +10,14 @@ interface ApiResponse {
 
 function ApiConnectionTest() {
   const [data, setData] = useState<ApiResponse | null>(null);
+
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:5029/api/Test")
+    axiosInstance
+      .get<ApiResponse>("/Test")
       .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
-        }
-
-        return response.json();
-      })
-      .then((result: ApiResponse) => {
-        setData(result);
+        setData(response.data);
       })
       .catch((err: Error) => {
         setError(err.message);
@@ -36,9 +34,13 @@ function ApiConnectionTest() {
 
   return (
     <div>
-      {" "}
-      <h3>Backend Connection</h3> <p>{data.message}</p>{" "}
-      <p>Status: {data.status ? "Connected" : "Failed"}</p>{" "}
+      <h3>Backend Connection</h3>
+
+      <p>{data.message}</p>
+
+      <p>
+        Status: {data.status ? "Connected" : "Failed"}
+      </p>
     </div>
   );
 }

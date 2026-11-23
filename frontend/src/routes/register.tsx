@@ -1,10 +1,30 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+
+import {
+  createFileRoute,
+  Link,
+  redirect,
+} from "@tanstack/react-router";
+
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
+
 import { registerUser } from "../features/auth/auth.api";
+import { authQueryOptions } from "../features/auth/auth.queries";
 
 export const Route = createFileRoute("/register")({
+  beforeLoad: async ({ context }) => {
+    const user = await context.queryClient.fetchQuery(
+      authQueryOptions(),
+    );
+
+    if (user) {
+      throw redirect({
+        to: "/dashboard",
+      });
+    }
+  },
+
   component: RegisterPage,
 });
 
@@ -32,6 +52,7 @@ function RegisterPage() {
         pinCode: "",
       },
     },
+
     onSubmit: async ({ value }) => {
       setRegistered(false);
       registerMutation.reset();
@@ -48,7 +69,8 @@ function RegisterPage() {
   const inputClass =
     "w-full rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
 
-  const labelClass = "mb-1 block text-sm font-medium text-gray-700";
+  const labelClass =
+    "mb-1 block text-sm font-medium text-gray-700";
 
   return (
     <div className="min-h-screen bg-gray-100 px-4 py-10">
@@ -67,7 +89,10 @@ function RegisterPage() {
             className="mb-5 rounded-lg bg-green-50 p-4 text-sm text-green-700"
           >
             Registration successful! You can now{" "}
-            <Link to="/login" className="font-semibold underline">
+            <Link
+              to="/login"
+              className="font-semibold underline"
+            >
               sign in
             </Link>
             .
@@ -79,7 +104,8 @@ function RegisterPage() {
             role="alert"
             className="mb-5 rounded-lg bg-red-50 p-4 text-sm text-red-700"
           >
-            {registerMutation.error.message || "Registration failed."}
+            {registerMutation.error.message ||
+              "Registration failed."}
           </div>
         )}
 
@@ -87,6 +113,7 @@ function RegisterPage() {
           onSubmit={(event) => {
             event.preventDefault();
             event.stopPropagation();
+
             void form.handleSubmit();
           }}
           className="space-y-5"
@@ -96,14 +123,20 @@ function RegisterPage() {
               name="name"
               validators={{
                 onBlur: ({ value }) =>
-                  !value.trim() ? "Full name is required." : undefined,
+                  !value.trim()
+                    ? "Full name is required."
+                    : undefined,
               }}
             >
               {(field) => (
                 <div>
-                  <label htmlFor={field.name} className={labelClass}>
+                  <label
+                    htmlFor={field.name}
+                    className={labelClass}
+                  >
                     Full name *
                   </label>
+
                   <input
                     id={field.name}
                     className={inputClass}
@@ -115,11 +148,17 @@ function RegisterPage() {
                     }
                     placeholder="Enter your full name"
                   />
-                  {field.state.meta.errors.map((error, index) => (
-                    <p key={index} className="mt-1 text-sm text-red-600">
-                      {String(error)}
-                    </p>
-                  ))}
+
+                  {field.state.meta.errors.map(
+                    (error, index) => (
+                      <p
+                        key={index}
+                        className="mt-1 text-sm text-red-600"
+                      >
+                        {String(error)}
+                      </p>
+                    ),
+                  )}
                 </div>
               )}
             </form.Field>
@@ -137,9 +176,13 @@ function RegisterPage() {
             >
               {(field) => (
                 <div>
-                  <label htmlFor={field.name} className={labelClass}>
+                  <label
+                    htmlFor={field.name}
+                    className={labelClass}
+                  >
                     Email address *
                   </label>
+
                   <input
                     id={field.name}
                     type="email"
@@ -152,11 +195,17 @@ function RegisterPage() {
                     }
                     placeholder="you@example.com"
                   />
-                  {field.state.meta.errors.map((error, index) => (
-                    <p key={index} className="mt-1 text-sm text-red-600">
-                      {String(error)}
-                    </p>
-                  ))}
+
+                  {field.state.meta.errors.map(
+                    (error, index) => (
+                      <p
+                        key={index}
+                        className="mt-1 text-sm text-red-600"
+                      >
+                        {String(error)}
+                      </p>
+                    ),
+                  )}
                 </div>
               )}
             </form.Field>
@@ -174,9 +223,13 @@ function RegisterPage() {
             >
               {(field) => (
                 <div>
-                  <label htmlFor={field.name} className={labelClass}>
+                  <label
+                    htmlFor={field.name}
+                    className={labelClass}
+                  >
                     Password *
                   </label>
+
                   <input
                     id={field.name}
                     type="password"
@@ -189,11 +242,17 @@ function RegisterPage() {
                     }
                     placeholder="At least 8 characters"
                   />
-                  {field.state.meta.errors.map((error, index) => (
-                    <p key={index} className="mt-1 text-sm text-red-600">
-                      {String(error)}
-                    </p>
-                  ))}
+
+                  {field.state.meta.errors.map(
+                    (error, index) => (
+                      <p
+                        key={index}
+                        className="mt-1 text-sm text-red-600"
+                      >
+                        {String(error)}
+                      </p>
+                    ),
+                  )}
                 </div>
               )}
             </form.Field>
@@ -211,9 +270,13 @@ function RegisterPage() {
             >
               {(field) => (
                 <div>
-                  <label htmlFor={field.name} className={labelClass}>
+                  <label
+                    htmlFor={field.name}
+                    className={labelClass}
+                  >
                     Contact number *
                   </label>
+
                   <input
                     id={field.name}
                     type="tel"
@@ -226,11 +289,17 @@ function RegisterPage() {
                     }
                     placeholder="Enter contact number"
                   />
-                  {field.state.meta.errors.map((error, index) => (
-                    <p key={index} className="mt-1 text-sm text-red-600">
-                      {String(error)}
-                    </p>
-                  ))}
+
+                  {field.state.meta.errors.map(
+                    (error, index) => (
+                      <p
+                        key={index}
+                        className="mt-1 text-sm text-red-600"
+                      >
+                        {String(error)}
+                      </p>
+                    ),
+                  )}
                 </div>
               )}
             </form.Field>
@@ -238,21 +307,26 @@ function RegisterPage() {
             <form.Field name="gender">
               {(field) => (
                 <div>
-                  <label htmlFor={field.name} className={labelClass}>
+                  <label
+                    htmlFor={field.name}
+                    className={labelClass}
+                  >
                     Gender
                   </label>
+
                   <select
                     id={field.name}
                     className={inputClass}
                     value={field.state.value}
                     onChange={(event) =>
-                      field.handleChange(Number(event.target.value))
+                      field.handleChange(
+                        Number(event.target.value),
+                      )
                     }
                   >
                     <option value={0}>Select gender</option>
                     <option value={1}>Male</option>
                     <option value={2}>Female</option>
-                    <option value={3}>Other</option>
                   </select>
                 </div>
               )}
@@ -262,14 +336,20 @@ function RegisterPage() {
               name="dateofBirth"
               validators={{
                 onBlur: ({ value }) =>
-                  !value ? "Date of birth is required." : undefined,
+                  !value
+                    ? "Date of birth is required."
+                    : undefined,
               }}
             >
               {(field) => (
                 <div>
-                  <label htmlFor={field.name} className={labelClass}>
+                  <label
+                    htmlFor={field.name}
+                    className={labelClass}
+                  >
                     Date of birth *
                   </label>
+
                   <input
                     id={field.name}
                     type="date"
@@ -281,11 +361,17 @@ function RegisterPage() {
                       field.handleChange(event.target.value)
                     }
                   />
-                  {field.state.meta.errors.map((error, index) => (
-                    <p key={index} className="mt-1 text-sm text-red-600">
-                      {String(error)}
-                    </p>
-                  ))}
+
+                  {field.state.meta.errors.map(
+                    (error, index) => (
+                      <p
+                        key={index}
+                        className="mt-1 text-sm text-red-600"
+                      >
+                        {String(error)}
+                      </p>
+                    ),
+                  )}
                 </div>
               )}
             </form.Field>
@@ -301,14 +387,20 @@ function RegisterPage() {
                 name="address.addressLine1"
                 validators={{
                   onBlur: ({ value }) =>
-                    !value.trim() ? "Address line 1 is required." : undefined,
+                    !value.trim()
+                      ? "Address line 1 is required."
+                      : undefined,
                 }}
               >
                 {(field) => (
                   <div className="sm:col-span-2">
-                    <label htmlFor={field.name} className={labelClass}>
+                    <label
+                      htmlFor={field.name}
+                      className={labelClass}
+                    >
                       Address line 1 *
                     </label>
+
                     <input
                       id={field.name}
                       className={inputClass}
@@ -320,11 +412,17 @@ function RegisterPage() {
                       }
                       placeholder="House number, street, area"
                     />
-                    {field.state.meta.errors.map((error, index) => (
-                      <p key={index} className="mt-1 text-sm text-red-600">
-                        {String(error)}
-                      </p>
-                    ))}
+
+                    {field.state.meta.errors.map(
+                      (error, index) => (
+                        <p
+                          key={index}
+                          className="mt-1 text-sm text-red-600"
+                        >
+                          {String(error)}
+                        </p>
+                      ),
+                    )}
                   </div>
                 )}
               </form.Field>
@@ -332,9 +430,13 @@ function RegisterPage() {
               <form.Field name="address.addressLine2">
                 {(field) => (
                   <div className="sm:col-span-2">
-                    <label htmlFor={field.name} className={labelClass}>
+                    <label
+                      htmlFor={field.name}
+                      className={labelClass}
+                    >
                       Address line 2 (optional)
                     </label>
+
                     <input
                       id={field.name}
                       className={inputClass}
@@ -362,14 +464,20 @@ function RegisterPage() {
                   name={`address.${key}`}
                   validators={{
                     onBlur: ({ value }) =>
-                      !value.trim() ? `${label} is required.` : undefined,
+                      !value.trim()
+                        ? `${label} is required.`
+                        : undefined,
                   }}
                 >
                   {(field) => (
                     <div>
-                      <label htmlFor={field.name} className={labelClass}>
+                      <label
+                        htmlFor={field.name}
+                        className={labelClass}
+                      >
                         {label} *
                       </label>
+
                       <input
                         id={field.name}
                         className={inputClass}
@@ -381,11 +489,17 @@ function RegisterPage() {
                         }
                         placeholder={`Enter ${label.toLowerCase()}`}
                       />
-                      {field.state.meta.errors.map((error, index) => (
-                        <p key={index} className="mt-1 text-sm text-red-600">
-                          {String(error)}
-                        </p>
-                      ))}
+
+                      {field.state.meta.errors.map(
+                        (error, index) => (
+                          <p
+                            key={index}
+                            className="mt-1 text-sm text-red-600"
+                          >
+                            {String(error)}
+                          </p>
+                        ),
+                      )}
                     </div>
                   )}
                 </form.Field>
@@ -395,7 +509,9 @@ function RegisterPage() {
 
           <button
             type="submit"
-            disabled={registerMutation.isPending || registered}
+            disabled={
+              registerMutation.isPending || registered
+            }
             className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {registerMutation.isPending
