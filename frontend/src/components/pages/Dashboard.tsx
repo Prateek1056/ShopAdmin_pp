@@ -7,6 +7,8 @@ import StockAlerts from "../Dashboard/StockAlerts";
 import RecentOrders from "../Dashboard/RecentOrders";
 
 function Dashboard() {
+  const APP_URL = import.meta.env.VITE_APP_URL;
+  console.log("APP_URL:", APP_URL);
   return (
     <Row gutter={[16, 16]}>
       <Col span={24}>

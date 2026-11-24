@@ -102,6 +102,11 @@ var app = builder.Build();
 // Create required MongoDB indexes for login sessions.
 var dbConfig = app.Services.GetRequiredService<DBConfiguration>();
 
+Console.WriteLine("MongoDB Connection String Present: " +
+    !string.IsNullOrWhiteSpace(dbConfig.ConnectionString));
+
+Console.WriteLine("MongoDB Database: " + dbConfig.Database);
+
 var loginSessionDB = new LoginSessionDB(dbConfig);
 
 await loginSessionDB.EnsureIndexesAsync();

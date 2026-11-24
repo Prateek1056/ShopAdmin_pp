@@ -1,6 +1,12 @@
-
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+
+import { useQueryClient } from "@tanstack/react-query";
+
+import { queryKeys } from "../../lib/queryKeys";
+
+import { useQuery } from "@tanstack/react-query";
+import { authQueryOptions } from "../../features/auth/auth.queries";
 
 import {
   Avatar,
@@ -43,22 +49,39 @@ function Header({
   const { token } = theme.useToken();
   const navigate = useNavigate();
 
+  const queryClient = useQueryClient();
+
+  const { data: currentUser } = useQuery(authQueryOptions());
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
 
+      // Call backend logout API
       await logoutUser();
+
+      // Cancel any ongoing current-user requests
+      await queryClient.cancelQueries({
+        queryKey: [queryKeys.AUTH_USER],
+      });
+
+      // Update authentication cache immediately
+      queryClient.setQueryData([queryKeys.AUTH_USER], null);
 
       message.success("Logged out successfully.");
 
-      await navigate({ to: "/login" });
+      // Navigate to login page
+      await navigate({
+        to: "/login",
+        replace: true,
+      });
     } catch (error) {
       message.error(
         error instanceof Error
           ? error.message
-          : "Unable to logout. Please try again."
+          : "Unable to logout. Please try again.",
       );
     } finally {
       setIsLoggingOut(false);
@@ -78,13 +101,23 @@ function Header({
       }}
     >
       <Flex vertical align="center" gap={10}>
-        <Avatar size={80} src="/profile.jpg" icon={<UserOutlined />} />
+        <Avatar
+          size={80}
+          src={currentUser?.profilePic || undefined}
+          icon={<UserOutlined />}
+        />
 
         <Typography.Title level={5} style={{ margin: 0 }}>
-          Prateek Sharma
+          {currentUser?.userName || "User"}
         </Typography.Title>
 
-        <Typography.Text type="secondary">Admin</Typography.Text>
+        <Typography.Text type="secondary">
+          {currentUser?.role || ""}
+        </Typography.Text>
+
+        <Typography.Text type="secondary">
+          {currentUser?.email || ""}
+        </Typography.Text>
       </Flex>
 
       <Divider />
@@ -190,19 +223,22 @@ function Header({
           <Dropdown
             trigger={["click"]}
             placement="bottomRight"
-            dropdownRender={() => profileContent}
+            popupRender={() => profileContent}
           >
             <Flex align="center" gap={10} className="cursor-pointer">
-              <Avatar size={42} src="/profile.jpg" icon={<UserOutlined />} />
+              <Avatar
+                size={42}
+                src={currentUser?.profilePic || undefined}
+                icon={<UserOutlined />}
+              />
 
               <Flex vertical>
-                <Typography.Text strong>Prateek Sharma</Typography.Text>
+                <Typography.Text strong>
+                  {currentUser?.userName || "User"}
+                </Typography.Text>
 
-                <Typography.Text
-                  type="secondary"
-                  style={{ fontSize: 12 }}
-                >
-                  Admin
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  {currentUser?.role || ""}
                 </Typography.Text>
               </Flex>
 

@@ -9,6 +9,7 @@ using Net_Backend.Feature.Auth.Services;
 using Net_Backend.Services.Authentication;
 using Net_Backend.Utilities;
 using System.Security.Claims;
+using Net_Backend.Feature.ApplicationUser.Model;
 
 namespace Net_Backend.Feature.Auth.Controller
 {
@@ -143,7 +144,7 @@ namespace Net_Backend.Feature.Auth.Controller
 
         [Authorize]
         [HttpGet("me")]
-        public ApiResponse<CurrentUserDto> GetCurrentUser()
+        public async Task<ApiResponse<CurrentUserDto>> GetCurrentUser()
         {
             var response = new ApiResponse<CurrentUserDto>();
 
@@ -153,13 +154,22 @@ namespace Net_Backend.Feature.Auth.Controller
                     ClaimTypes.NameIdentifier
                 )?.Value;
 
-                var userName = User.Identity?.Name;
-
-                if (string.IsNullOrEmpty(userId) ||
-                    string.IsNullOrEmpty(userName))
+                if (string.IsNullOrEmpty(userId))
                 {
                     response.Success = false;
                     response.Message = "User information not found";
+                    return response;
+                }
+
+                // Fetch the latest user information from MongoDB
+                var userDB = new UserDB(_dbConfig, User);
+
+                var user = await userDB.GetAsync(userId);
+
+                if (user == null || user.IsDeleted || !user.IsActive)
+                {
+                    response.Success = false;
+                    response.Message = "User not found or inactive";
                     return response;
                 }
 
@@ -168,8 +178,12 @@ namespace Net_Backend.Feature.Auth.Controller
 
                 response.Data = new CurrentUserDto
                 {
-                    UserId = userId,
-                    UserName = userName
+                    UserId = user.Id,
+                    UserName = user.Name,
+                    Email = user.Email,
+                    Phone = user.Phone,
+                    Role = user.Role.ToString(),
+                    ProfilePic = user.ProfilePic
                 };
             }
             catch (Exception ex)

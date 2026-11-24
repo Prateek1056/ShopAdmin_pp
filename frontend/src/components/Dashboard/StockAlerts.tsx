@@ -1,12 +1,4 @@
-import {
-  Avatar,
-  Button,
-  Card,
-  Space,
-  Table,
-  Tag,
-  Typography,
-} from "antd";
+import { Avatar, Button, Card, Space, Table, Tag, Typography } from "antd";
 
 import { AppstoreOutlined, FilterOutlined } from "@ant-design/icons";
 
@@ -16,6 +8,7 @@ import { stockAlerts } from "../data/dashboardData";
 import type { StockAlert } from "../../types/dashboard";
 
 function StockAlerts() {
+  
   const columns: ColumnsType<StockAlert> = [
     {
       title: "PRODUCT",

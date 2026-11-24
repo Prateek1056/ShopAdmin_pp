@@ -1,4 +1,3 @@
-
 export interface LoginRequest {
   email: string;
   password: string;
@@ -7,6 +6,10 @@ export interface LoginRequest {
 export interface CurrentUserDto {
   userId: string;
   userName: string;
+  email: string;
+  phone: string;
+  role: string;
+  profilePic: string;
 }
 
 export interface ApiError {

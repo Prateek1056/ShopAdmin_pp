@@ -1,10 +1,4 @@
-
-import {
-  Flex,
-  Layout,
-  Menu,
-  Typography,
-} from "antd";
+import { Flex, Layout, Menu, Typography } from "antd";
 
 import type { MenuProps } from "antd";
 
@@ -18,10 +12,10 @@ import {
   QuestionCircleOutlined,
 } from "@ant-design/icons";
 
-import {
-  useNavigate,
-  useRouterState,
-} from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
+
+import { useQuery } from "@tanstack/react-query";
+import { authQueryOptions } from "../../features/auth/auth.queries";
 
 function Sidebar({ collapsed }: { collapsed: boolean }) {
   // Router navigation
@@ -31,6 +25,12 @@ function Sidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
+
+  // Get currently logged-in user
+  const { data: currentUser } = useQuery(authQueryOptions());
+
+  // Check whether the logged-in user is an Admin
+  const isAdmin = currentUser?.role === "Admin";
 
   // Sidebar menu items
   const mainItems = [
@@ -49,11 +49,15 @@ function Sidebar({ collapsed }: { collapsed: boolean }) {
       label: "Orders",
       icon: <ShoppingCartOutlined />,
     },
-    {
-      key: "users",
-      label: "Users",
-      icon: <TeamOutlined />,
-    },
+    ...(isAdmin
+      ? [
+          {
+            key: "users",
+            label: "Users",
+            icon: <TeamOutlined />,
+          },
+        ]
+      : []),
   ];
 
   const bottomItems = [
