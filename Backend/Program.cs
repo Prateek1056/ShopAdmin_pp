@@ -11,6 +11,7 @@ using Net_Backend.Middleware.ReqContext;
 using Net_Backend.Services.Authentication;
 using System.Text;
 using Net_Backend.Feature.Auth.Entity;
+using Net_Backend.Services.Cloudinary;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,10 +53,15 @@ builder.Services.AddSwaggerGen(options =>
 AppConfig.Init(builder.Configuration);
 builder.Services.AddAppConfiguration(builder.Configuration);
 
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("Cloudinary")
+);
+
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<PasswordService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ProductServices>();
+builder.Services.AddScoped<CloudinaryImageService>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
