@@ -30,6 +30,8 @@ namespace Net_Backend.Feature.ApplicationUser.Model
 
         public string ProfilePic { get; set; } = string.Empty;
 
+        public string ProfilePicPublicId { get; set; } = string.Empty;
+
         public UserRole Role { get; set; } = UserRole.User;
 
         public LastLogin? LastLogin { get; set; }

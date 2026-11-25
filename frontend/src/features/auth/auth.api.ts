@@ -73,3 +73,49 @@ export async function getCurrentUser(): Promise<
 
   return response;
 }
+
+
+export async function uploadProfilePicture(
+  file: File,
+): Promise<ApiResponse<boolean>> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await apiRequest<ApiResponse<boolean>>(
+    "/Profile/UploadProfilePicture",
+    {
+      method: "POST",
+      data: formData,
+      headers: {
+        "Content-Type": undefined,
+      },
+    },
+  );
+
+  if (!response.success) {
+    throw new Error(
+      response.message || "Profile picture upload failed.",
+    );
+  }
+
+  return response;
+}
+
+export async function removeProfilePicture(): Promise<
+  ApiResponse<boolean>
+> {
+  const response = await apiRequest<ApiResponse<boolean>>(
+    "/Profile/RemoveProfilePicture",
+    {
+      method: "POST",
+    },
+  );
+
+  if (!response.success) {
+    throw new Error(
+      response.message || "Unable to remove profile picture.",
+    );
+  }
+
+  return response;
+}

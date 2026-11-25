@@ -31,7 +31,6 @@ namespace Net_Backend.Feature.Products.Controller
             return await _productServices.GetAllAsync();
         }
 
-        // Public endpoint: Retrieve a product by ID.
         [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ApiResponse<ProductDto>> GetById(string id)

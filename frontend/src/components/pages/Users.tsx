@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 
 import { useGetUsers, useSaveUser } from "../../Services/user.services";
@@ -18,7 +17,6 @@ import {
   Space,
   Table,
   Tag,
-  Typography,
 } from "antd";
 
 import type { TableColumnsType } from "antd";
@@ -85,12 +83,7 @@ function Users() {
   // React Query hooks from user.services.ts
   const saveUserMutation = useSaveUser();
 
-  const {
-    data: users = [],
-    isLoading,
-    isError,
-    error,
-  } = useGetUsers();
+  const { data: users = [], isLoading, isError, error } = useGetUsers();
 
   const filteredUsers = users.filter((user) => {
     const search = searchText.toLowerCase();
@@ -135,7 +128,7 @@ function Users() {
       setIsDrawerOpen(false);
     } catch (error) {
       message.error(
-        error instanceof Error ? error.message : "Failed to create user."
+        error instanceof Error ? error.message : "Failed to create user.",
       );
     }
   };
@@ -147,7 +140,7 @@ function Users() {
 
   return (
     <Space orientation="vertical" size="large" style={{ width: "100%" }}>
-      <Typography.Title level={3}>User Management</Typography.Title>
+      {/* <Typography.Title level={3}>User Management</Typography.Title> */}
 
       {isError && (
         <Alert
@@ -206,7 +199,7 @@ function Users() {
           dataSource={filteredUsers}
           loading={isLoading}
           pagination={false}
-          scroll={{ x: true }}
+          scroll={{ x: true, y: "calc(100vh - 280px)" }}
         />
       </Card>
 
@@ -241,9 +234,7 @@ function Users() {
           <Form.Item
             label="Full Name"
             name="name"
-            rules={[
-              { required: true, message: "Please enter the full name." },
-            ]}
+            rules={[{ required: true, message: "Please enter the full name." }]}
           >
             <Input placeholder="Enter full name" />
           </Form.Item>
@@ -283,9 +274,7 @@ function Users() {
           <Form.Item
             label="Role"
             name="role"
-            rules={[
-              { required: true, message: "Please select a role." },
-            ]}
+            rules={[{ required: true, message: "Please select a role." }]}
           >
             <Select
               options={[

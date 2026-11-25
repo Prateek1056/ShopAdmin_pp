@@ -21,6 +21,7 @@
     "echarts-for-react": "^3.0.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-easy-crop": "^6.2.5",
     "react-router-dom": "^7.18.4",
     "recharts": "^3.10.1"
   },

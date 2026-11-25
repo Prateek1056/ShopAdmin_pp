@@ -1,12 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import type { ChangeEvent } from "react";
+
 import { useNavigate } from "@tanstack/react-router";
-
-import { useQueryClient } from "@tanstack/react-query";
-
-import { queryKeys } from "../../lib/queryKeys";
-
-import { useQuery } from "@tanstack/react-query";
-import { authQueryOptions } from "../../features/auth/auth.queries";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   Avatar,
@@ -17,6 +13,7 @@ import {
   Flex,
   Input,
   Layout,
+  Popconfirm,
   Space,
   Typography,
   message,
@@ -31,9 +28,23 @@ import {
   UserOutlined,
   LockOutlined,
   LogoutOutlined,
+  CameraOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 
-import { logoutUser } from "../../features/auth/auth.api";
+import { queryKeys } from "../../lib/queryKeys";
+
+import {
+  logoutUser,
+  uploadProfilePicture,
+  removeProfilePicture,
+} from "../../features/auth/auth.api";
+
+import { authQueryOptions } from "../../features/auth/auth.queries";
+
+import ImageCropDialog from "../common/image-crop-dialog";
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 function Header({
   collapsed,
@@ -53,26 +64,122 @@ function Header({
 
   const { data: currentUser } = useQuery(authQueryOptions());
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isRemovingPicture, setIsRemovingPicture] = useState(false);
+
+  const [cropImage, setCropImage] = useState<string | null>(null);
+
+  const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+
+  const openFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const clearCropImage = () => {
+    if (cropImage) {
+      URL.revokeObjectURL(cropImage);
+    }
+
+    setCropImage(null);
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    // Reset the input so the same file can be selected again.
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      message.error("Please select a JPG, PNG, or WEBP image.");
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      message.error("Image size must not exceed 5 MB.");
+      return;
+    }
+
+    if (cropImage) {
+      URL.revokeObjectURL(cropImage);
+    }
+
+    const imageUrl = URL.createObjectURL(file);
+
+    setCropImage(imageUrl);
+  };
+
+  const handleCropComplete = async (croppedFile: File) => {
+    try {
+      setIsUploadingPicture(true);
+
+      await uploadProfilePicture(croppedFile);
+
+      // Refresh the current user's data to get the new Cloudinary URL.
+      await queryClient.invalidateQueries({
+        queryKey: [queryKeys.AUTH_USER],
+      });
+
+      message.success("Profile picture updated successfully.");
+
+      clearCropImage();
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Unable to upload profile picture.",
+      );
+
+      throw error;
+    } finally {
+      setIsUploadingPicture(false);
+    }
+  };
+
+  const handleRemovePicture = async () => {
+    try {
+      setIsRemovingPicture(true);
+
+      await removeProfilePicture();
+
+      // Refresh the current user's data after removal.
+      await queryClient.invalidateQueries({
+        queryKey: [queryKeys.AUTH_USER],
+      });
+
+      message.success("Profile picture removed successfully.");
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Unable to remove profile picture.",
+      );
+    } finally {
+      setIsRemovingPicture(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
 
-      // Call backend logout API
       await logoutUser();
 
-      // Cancel any ongoing current-user requests
       await queryClient.cancelQueries({
         queryKey: [queryKeys.AUTH_USER],
       });
 
-      // Update authentication cache immediately
       queryClient.setQueryData([queryKeys.AUTH_USER], null);
 
       message.success("Logged out successfully.");
 
-      // Navigate to login page
       await navigate({
         to: "/login",
         replace: true,
@@ -101,11 +208,58 @@ function Header({
       }}
     >
       <Flex vertical align="center" gap={10}>
-        <Avatar
-          size={80}
-          src={currentUser?.profilePic || undefined}
-          icon={<UserOutlined />}
-        />
+        <div
+          style={{
+            position: "relative",
+            display: "inline-flex",
+          }}
+        >
+          <Avatar
+            size={80}
+            src={currentUser?.profilePic || undefined}
+            icon={<UserOutlined />}
+          />
+
+          <Button
+            type="primary"
+            shape="circle"
+            size="small"
+            icon={<CameraOutlined />}
+            title="Change profile picture"
+            onClick={openFilePicker}
+            style={{
+              position: "absolute",
+              right: -4,
+              bottom: -4,
+              boxShadow: token.boxShadow,
+            }}
+          />
+        </div>
+
+        {currentUser?.profilePic && (
+          <Popconfirm
+            title="Remove profile picture?"
+            description="Your current profile picture will be removed."
+            okText="Remove"
+            cancelText="Cancel"
+            okButtonProps={{
+              danger: true,
+              loading: isRemovingPicture,
+            }}
+            onConfirm={handleRemovePicture}
+          >
+            <Button
+              danger
+              type="text"
+              size="small"
+              icon={<DeleteOutlined />}
+              loading={isRemovingPicture}
+              disabled={isRemovingPicture}
+            >
+              Remove picture
+            </Button>
+          </Popconfirm>
+        )}
 
         <Typography.Title level={5} style={{ margin: 0 }}>
           {currentUser?.userName || "User"}
@@ -185,74 +339,92 @@ function Header({
   );
 
   return (
-    <Layout.Header
-      className="h-20! px-6!"
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 40,
-        background: token.colorBgContainer,
-      }}
-    >
-      <Flex
-        align="center"
-        justify="space-between"
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={handleFileChange}
+      />
+
+      <ImageCropDialog
+        open={Boolean(cropImage)}
+        image={cropImage}
+        onCancel={clearCropImage}
+        onCropComplete={handleCropComplete}
+        isUploading={isUploadingPicture}
+      />
+
+      <Layout.Header
+        className="h-20! px-6!"
         style={{
-          height: "100%",
+          position: "sticky",
+          top: 0,
+          zIndex: 40,
+          background: token.colorBgContainer,
         }}
       >
-        <Space size={16}>
-          <MenuFoldOutlined
-            className="cursor-pointer text-lg"
-            onClick={() => setCollapsed(!collapsed)}
-          />
+        <Flex
+          align="center"
+          justify="space-between"
+          style={{
+            height: "100%",
+          }}
+        >
+          <Space size={16}>
+            <MenuFoldOutlined
+              className="cursor-pointer text-lg"
+              onClick={() => setCollapsed(!collapsed)}
+            />
 
-          <Input
-            prefix={<SearchOutlined />}
-            placeholder="Search anything ..."
-            className="w-80!"
-          />
-        </Space>
+            <Input
+              prefix={<SearchOutlined />}
+              placeholder="Search anything ..."
+              className="w-80!"
+            />
+          </Space>
 
-        <Space size={20}>
-          <SunOutlined
-            className="cursor-pointer text-lg"
-            onClick={() => setIsDark(!isDark)}
-          />
+          <Space size={20}>
+            <SunOutlined
+              className="cursor-pointer text-lg"
+              onClick={() => setIsDark(!isDark)}
+            />
 
-          <Dropdown
-            trigger={["click"]}
-            placement="bottomRight"
-            popupRender={() => profileContent}
-          >
-            <Flex align="center" gap={10} className="cursor-pointer">
-              <Avatar
-                size={42}
-                src={currentUser?.profilePic || undefined}
-                icon={<UserOutlined />}
-              />
+            <Dropdown
+              trigger={["click"]}
+              placement="bottomRight"
+              popupRender={() => profileContent}
+            >
+              <Flex align="center" gap={10} className="cursor-pointer">
+                <Avatar
+                  size={42}
+                  src={currentUser?.profilePic || undefined}
+                  icon={<UserOutlined />}
+                />
 
-              <Flex vertical>
-                <Typography.Text strong>
-                  {currentUser?.userName || "User"}
-                </Typography.Text>
+                <Flex vertical>
+                  <Typography.Text strong>
+                    {currentUser?.userName || "User"}
+                  </Typography.Text>
 
-                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                  {currentUser?.role || ""}
-                </Typography.Text>
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    {currentUser?.role || ""}
+                  </Typography.Text>
+                </Flex>
+
+                <DownOutlined
+                  style={{
+                    fontSize: 10,
+                    color: token.colorTextSecondary,
+                  }}
+                />
               </Flex>
-
-              <DownOutlined
-                style={{
-                  fontSize: 10,
-                  color: token.colorTextSecondary,
-                }}
-              />
-            </Flex>
-          </Dropdown>
-        </Space>
-      </Flex>
-    </Layout.Header>
+            </Dropdown>
+          </Space>
+        </Flex>
+      </Layout.Header>
+    </>
   );
 }
 
