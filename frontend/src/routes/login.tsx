@@ -1,4 +1,3 @@
-
 import {
   createFileRoute,
   Link,
@@ -6,10 +5,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 
-import {
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useForm } from "@tanstack/react-form";
 
@@ -21,13 +17,11 @@ import FullScreenLoader from "../components/common/FullScreenLoader";
 
 export const Route = createFileRoute("/login")({
   beforeLoad: async ({ context }) => {
-    const user = await context.queryClient.fetchQuery(
-      authQueryOptions(),
-    );
+    const user = await context.queryClient.fetchQuery(authQueryOptions());
 
     if (user) {
       throw redirect({
-        to: "/dashboard",
+        to: user.role === "Admin" ? "/dashboard" : "/",
       });
     }
   },
@@ -45,9 +39,7 @@ function LoginPage() {
 
     onSuccess: async (response) => {
       if (!response.success || !response.data) {
-        throw new Error(
-          response.message || "Login failed.",
-        );
+        throw new Error(response.message || "Login failed.");
       }
 
       // Remove any previously cached unauthenticated state.
@@ -56,18 +48,14 @@ function LoginPage() {
       });
 
       // Retrieve the authenticated user from the backend.
-      const user = await queryClient.fetchQuery(
-        authQueryOptions(),
-      );
+      const user = await queryClient.fetchQuery(authQueryOptions());
 
       if (!user) {
-        throw new Error(
-          "Unable to establish authenticated session.",
-        );
+        throw new Error("Unable to establish authenticated session.");
       }
 
       navigate({
-        to: "/dashboard",
+        to: user.role === "Admin" ? "/dashboard" : "/",
         replace: true,
       });
     },
@@ -135,23 +123,16 @@ function LoginPage() {
                     autoComplete="email"
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(event) =>
-                      field.handleChange(event.target.value)
-                    }
+                    onChange={(event) => field.handleChange(event.target.value)}
                     placeholder="you@example.com"
                     className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
 
-                  {field.state.meta.errors.map(
-                    (error, index) => (
-                      <p
-                        key={index}
-                        className="mt-1 text-sm text-red-600"
-                      >
-                        {String(error)}
-                      </p>
-                    ),
-                  )}
+                  {field.state.meta.errors.map((error, index) => (
+                    <p key={index} className="mt-1 text-sm text-red-600">
+                      {String(error)}
+                    </p>
+                  ))}
                 </div>
               )}
             </form.Field>
@@ -160,9 +141,7 @@ function LoginPage() {
               name="password"
               validators={{
                 onBlur: ({ value }) =>
-                  !value
-                    ? "Password is required."
-                    : undefined,
+                  !value ? "Password is required." : undefined,
               }}
             >
               {(field) => (
@@ -180,31 +159,23 @@ function LoginPage() {
                     autoComplete="current-password"
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(event) =>
-                      field.handleChange(event.target.value)
-                    }
+                    onChange={(event) => field.handleChange(event.target.value)}
                     placeholder="Enter your password"
                     className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
 
-                  {field.state.meta.errors.map(
-                    (error, index) => (
-                      <p
-                        key={index}
-                        className="mt-1 text-sm text-red-600"
-                      >
-                        {String(error)}
-                      </p>
-                    ),
-                  )}
+                  {field.state.meta.errors.map((error, index) => (
+                    <p key={index} className="mt-1 text-sm text-red-600">
+                      {String(error)}
+                    </p>
+                  ))}
                 </div>
               )}
             </form.Field>
 
             {loginMutation.isError && (
               <p role="alert" className="text-sm text-red-600">
-                {loginMutation.error.message ||
-                  "Unable to sign in."}
+                {loginMutation.error.message || "Unable to sign in."}
               </p>
             )}
 
@@ -213,9 +184,7 @@ function LoginPage() {
               disabled={loginMutation.isPending}
               className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loginMutation.isPending
-                ? "Signing in..."
-                : "Sign in"}
+              {loginMutation.isPending ? "Signing in..." : "Sign in"}
             </button>
           </form>
 

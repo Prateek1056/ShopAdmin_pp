@@ -7,9 +7,9 @@ export const Route = createFileRoute("/_protected/dashboard")({
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.ensureQueryData(authQueryOptions());
 
-    if (!user) {
+    if (user?.role !== "Admin") {
       throw redirect({
-        to: "/login",
+        to: "/",
       });
     }
   },
