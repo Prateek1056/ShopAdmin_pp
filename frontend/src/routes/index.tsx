@@ -10,7 +10,8 @@ export const Route = createFileRoute("/")({
       authQueryOptions(),
     );
 
-    if (user?.role === "Admin") {
+    // Redirect every authenticated user to the dashboard.
+    if (user) {
       throw redirect({
         to: "/dashboard",
       });

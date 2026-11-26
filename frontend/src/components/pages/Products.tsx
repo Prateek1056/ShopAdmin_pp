@@ -114,7 +114,8 @@ function Products() {
         dataSource={products ?? []}
         rowKey="id"
         pagination={false}
-        scroll={{ x: "max-content" }}
+        scroll={{ x: true , y:"Calc(100vh - 300px)"}}
+        style={{transform: "translateY(20px)"}}
       />
     </>
   );
