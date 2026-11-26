@@ -18,5 +18,7 @@ namespace Net_Backend.Feature.Auth.DTO.Request
         public AddressModel Address { get; set; } = new();
 
         public DateTime DateofBirth { get; set; }
+
+        public UserRole Role { get; set; } = UserRole.User;
     }
 }

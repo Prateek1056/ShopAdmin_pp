@@ -1,3 +1,4 @@
+
 using System.Security.Claims;
 using Net_Backend.Data;
 
@@ -18,6 +19,8 @@ namespace Net_Backend.Feature.Products.Entity
         public string ImageUrl { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
+
+        public bool IsDeleted { get; set; } = false;
     }
 
     public class ProductDb : RecordDB<Product>

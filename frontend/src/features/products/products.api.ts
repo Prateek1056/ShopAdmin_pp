@@ -9,7 +9,7 @@ import type {
 } from "./products.types";
 
 export const getProducts = async (): Promise<Product[]> => {
-  return ApiUtility.get<Product[]>("/Product");
+  return ApiUtility.get<Product[]>("/Product/GetAll");
 };
 
 export const getProductById = async (

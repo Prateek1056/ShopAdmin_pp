@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Net_Backend.Common;
@@ -31,6 +30,7 @@ namespace Net_Backend.Feature.ApplicationUser.Controller
         }
 
         // GET ALL USERS
+        [HttpGet]
         [HttpGet("GetAll")]
         public async Task<ApiResponse<List<UserDto>>> GetAll()
         {
@@ -38,6 +38,7 @@ namespace Net_Backend.Feature.ApplicationUser.Controller
         }
 
         // GET USER BY ID
+        [HttpGet("{id}")]
         [HttpGet("GetById/{id}")]
         public async Task<ApiResponse<UserDto>> GetById(string id)
         {
@@ -45,7 +46,9 @@ namespace Net_Backend.Feature.ApplicationUser.Controller
         }
 
         // CREATE OR UPDATE USER
+        [HttpPost]
         [HttpPost("Save")]
+        [HttpPost("Update")]
         public async Task<ApiResponse<bool>> Save(
             [FromBody] SaveUserRequest item)
         {

@@ -55,7 +55,7 @@ namespace Net_Backend.Feature.Auth.Services
                     Gender = item.Gender,
                     Address = item.Address,
                     DateofBirth = item.DateofBirth,
-                    Role = UserRole.User
+                    Role = item.Role == UserRole.Admin ? UserRole.Admin : UserRole.User
                 };
 
                 response.Data = await _userDB.AddAsync(user);

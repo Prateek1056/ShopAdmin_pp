@@ -178,7 +178,7 @@ namespace Net_Backend.Feature.Auth.Controller
 
                 response.Data = new CurrentUserDto
                 {
-                    UserId = user.Id,
+                    UserId = user.Id ?? string.Empty,
                     UserName = user.Name,
                     Email = user.Email,
                     Phone = user.Phone,

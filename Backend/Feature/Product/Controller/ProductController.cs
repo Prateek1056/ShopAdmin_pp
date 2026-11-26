@@ -1,13 +1,13 @@
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Net_Backend.Common;
 using Net_Backend.Data;
-using Net_Backend.Feature.Products.Dto.Request;
-using Net_Backend.Feature.Products.Services;
-using Net_Backend.Feature.Products.Entity;
-using Net_Backend.Utilities;
 using Net_Backend.Feature.ApplicationUser.Model;
+using Net_Backend.Feature.Products.Dto.Request;
 using Net_Backend.Feature.Products.Dto.Response;
+using Net_Backend.Feature.Products.Services;
+using Net_Backend.Utilities;
 
 namespace Net_Backend.Feature.Products.Controller
 {
@@ -24,24 +24,26 @@ namespace Net_Backend.Feature.Products.Controller
             _productServices = new ProductServices(dbConfig);
         }
 
+        // GET ALL PRODUCTS
         [AllowAnonymous]
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<ApiResponse<List<ProductDto>>> GetAll()
         {
             return await _productServices.GetAllAsync();
         }
 
+        // GET PRODUCT BY ID
         [AllowAnonymous]
-        [HttpGet("{id}")]
+        [HttpGet("GetById/{id}")]
         public async Task<ApiResponse<ProductDto>> GetById(string id)
         {
             return await _productServices.GetByIdAsync(id);
         }
 
-
-        [HttpPost]
-        public async Task<ApiResponse<bool>> Create(
-            [FromBody] CreateProductRequestDto item)
+        // CREATE OR UPDATE PRODUCT
+        [HttpPost("Save")]
+        public async Task<ApiResponse<bool>> Save(
+            [FromBody] SaveProductRequestDto item)
         {
             var response = new ApiResponse<bool>();
 
@@ -53,18 +55,7 @@ namespace Net_Backend.Feature.Products.Controller
                 if (item == null)
                     return response.ErrorResponse("Invalid product data.");
 
-                var product = new Product
-                {
-                    Name = item.Name,
-                    Description = item.Description,
-                    Price = item.Price,
-                    Category = item.Category,
-                    StockQuantity = item.StockQuantity,
-                    ImageUrl = item.ImageUrl ?? string.Empty,
-                    IsActive = true
-                };
-
-                response = await _productServices.CreateAsync(product, User);
+                response = await _productServices.SaveAsync(item);
             }
             catch (Exception ex)
             {
@@ -74,31 +65,10 @@ namespace Net_Backend.Feature.Products.Controller
             return response;
         }
 
-        [HttpPost("Update")]
-        public async Task<ApiResponse<bool>> Update(
-            [FromBody] UpdateProductRequestDto item)
-        {
-            var response = new ApiResponse<bool>();
-
-            try
-            {
-                if (!ValidateModelState(response))
-                    return response;
-
-                response = await _productServices.UpdateAsync(item.Id, item, User);
-            }
-            catch (Exception ex)
-            {
-                response.AddError(ex.Message);
-            }
-
-            return response;
-        }
-
+        // SOFT DELETE PRODUCT
         [HttpPost("Delete")]
         public async Task<ApiResponse<bool>> Delete(
-            [FromBody] DeleteProductRequestDto item
-        )
+            [FromBody] DeleteProductRequestDto item)
         {
             var response = new ApiResponse<bool>();
 
@@ -106,6 +76,9 @@ namespace Net_Backend.Feature.Products.Controller
             {
                 if (!ValidateModelState(response))
                     return response;
+
+                if (item == null)
+                    return response.ErrorResponse("Invalid product data.");
 
                 response = await _productServices.DeleteAsync(item.Id);
             }

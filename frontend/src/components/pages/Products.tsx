@@ -104,9 +104,6 @@ function Products() {
 
   return (
     <>
-      <Typography.Title level={3}>
-        Products
-      </Typography.Title>
 
       <Typography.Text type="secondary">
         Total Products: {products?.length ?? 0}
