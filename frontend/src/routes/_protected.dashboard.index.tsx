@@ -1,6 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
 import Dashboard from "../components/pages/Dashboard";
 
-export const Route = createFileRoute("/_protected/dashboard/")({
-  component: Dashboard,
-});
+export default function DashboardIndex() {
+  return <Dashboard />;
+}

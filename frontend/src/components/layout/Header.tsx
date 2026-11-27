@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -180,10 +180,7 @@ function Header({
 
       message.success("Logged out successfully.");
 
-      await navigate({
-        to: "/login",
-        replace: true,
-      });
+      navigate("/login", { replace: true });
     } catch (error) {
       message.error(
         error instanceof Error

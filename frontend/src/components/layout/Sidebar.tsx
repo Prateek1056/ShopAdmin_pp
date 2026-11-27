@@ -1,64 +1,35 @@
-import { Flex, Layout, Menu, Typography } from "antd";
 
+import { Flex, Layout, Menu, Typography } from "antd";
 import type { MenuProps } from "antd";
 
 import {
-  DashboardOutlined,
-  AppstoreOutlined,
-  ShoppingCartOutlined,
-  TeamOutlined,
   SettingOutlined,
   ShoppingOutlined,
   QuestionCircleOutlined,
 } from "@ant-design/icons";
 
-import { useNavigate, useRouterState } from "@tanstack/react-router";
-
+import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+
 import { authQueryOptions } from "../../features/auth/auth.queries";
+import { navigationItems } from "../../routes/navigation";
 
 function Sidebar({ collapsed }: { collapsed: boolean }) {
-  // Router navigation
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Get current URL
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  });
-
-  // Get currently logged-in user
   const { data: currentUser } = useQuery(authQueryOptions());
 
-  // Check whether the logged-in user is an Admin
   const isAdmin = currentUser?.role === "Admin";
 
-  // Sidebar menu items
-  const mainItems = [
-    {
-      key: "dashboard",
-      label: "Dashboard",
-      icon: <DashboardOutlined />,
-    },
-    {
-      key: "products",
-      label: "Products",
-      icon: <AppstoreOutlined />,
-    },
-    {
-      key: "orders",
-      label: "Orders",
-      icon: <ShoppingCartOutlined />,
-    },
-    ...(isAdmin
-      ? [
-          {
-            key: "users",
-            label: "Users",
-            icon: <TeamOutlined />,
-          },
-        ]
-      : []),
-  ];
+  // Convert navigation configuration into Ant Design Menu items
+  const mainItems = navigationItems
+    .filter((item) => !item.adminOnly || isAdmin)
+    .map((item) => ({
+      key: item.key,
+      label: item.label,
+      icon: <item.icon />,
+    }));
 
   const bottomItems = [
     {
@@ -73,7 +44,8 @@ function Sidebar({ collapsed }: { collapsed: boolean }) {
     },
   ];
 
-  // Determine selected menu item from current URL
+  const pathname = location.pathname;
+
   const selectedKey = pathname.startsWith("/dashboard/users")
     ? "users"
     : pathname.startsWith("/dashboard/products")
@@ -82,24 +54,13 @@ function Sidebar({ collapsed }: { collapsed: boolean }) {
         ? "orders"
         : "dashboard";
 
-  // Handle sidebar navigation
   const handleMenuClick: MenuProps["onClick"] = ({ key }) => {
-    switch (key) {
-      case "dashboard":
-        void navigate({ to: "/dashboard" });
-        break;
+    const selectedItem = navigationItems.find(
+      (item) => item.key === key,
+    );
 
-      case "products":
-        void navigate({ to: "/dashboard/products" });
-        break;
-
-      case "orders":
-        void navigate({ to: "/dashboard/orders" });
-        break;
-
-      case "users":
-        void navigate({ to: "/dashboard/users" });
-        break;
+    if (selectedItem) {
+      navigate(selectedItem.path);
     }
   };
 

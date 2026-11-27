@@ -1,12 +1,6 @@
-import {
-  createFileRoute,
-  Link,
-  redirect,
-  useNavigate,
-} from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 import { useForm } from "@tanstack/react-form";
 
 import { loginUser } from "../features/auth/auth.api";
@@ -14,20 +8,6 @@ import { authQueryOptions } from "../features/auth/auth.queries";
 import { queryKeys } from "../lib/queryKeys";
 
 import FullScreenLoader from "../components/common/FullScreenLoader";
-
-export const Route = createFileRoute("/login")({
-  beforeLoad: async ({ context }) => {
-    const user = await context.queryClient.fetchQuery(authQueryOptions());
-
-    if (user) {
-      throw redirect({
-        to: user.role === "Admin" ? "/dashboard" : "/",
-      });
-    }
-  },
-
-  component: LoginPage,
-});
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -54,10 +34,8 @@ function LoginPage() {
         throw new Error("Unable to establish authenticated session.");
       }
 
-      navigate({
-        to: user.role === "Admin" ? "/dashboard" : "/",
-        replace: true,
-      });
+      // Both Admin and User go to dashboard.
+      navigate("/dashboard", { replace: true });
     },
   });
 
@@ -202,3 +180,5 @@ function LoginPage() {
     </>
   );
 }
+
+export default LoginPage;

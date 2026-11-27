@@ -1,32 +1,10 @@
-
-import {
-  createFileRoute,
-  Link,
-  redirect,
-} from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
 
 import { registerUser } from "../features/auth/auth.api";
-import { authQueryOptions } from "../features/auth/auth.queries";
-
-export const Route = createFileRoute("/register")({
-  beforeLoad: async ({ context }) => {
-    const user = await context.queryClient.fetchQuery(
-      authQueryOptions(),
-    );
-
-    if (user) {
-      throw redirect({
-        to: "/dashboard",
-      });
-    }
-  },
-
-  component: RegisterPage,
-});
 
 function RegisterPage() {
   const [registered, setRegistered] = useState(false);
@@ -535,3 +513,5 @@ function RegisterPage() {
     </div>
   );
 }
+
+export default RegisterPage;

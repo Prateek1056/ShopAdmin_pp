@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Layout, ConfigProvider, theme } from "antd";
-import { Outlet } from "@tanstack/react-router";
+import { Outlet } from "react-router-dom";
 
 import Sidebar from "./Sidebar";
 import Header from "./Header";
