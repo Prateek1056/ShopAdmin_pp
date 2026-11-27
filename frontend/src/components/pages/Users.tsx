@@ -4,6 +4,7 @@ import { useGetUsers, useSaveUser } from "../../Services/user.services";
 
 import type { UserDto, SaveUserRequest } from "../../types/users.types";
 import { Gender, UserRole } from "../../types/users.types";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 import {
   Alert,
@@ -13,6 +14,7 @@ import {
   Form,
   Input,
   message,
+  Popconfirm,
   Select,
   Space,
   Table,
@@ -27,6 +29,12 @@ type AddUserFormValues = {
   contactNumber: string;
   password: string;
   role: UserRole;
+};
+
+const deleteUser = {
+  mutate: (userId: string) => {
+    message.info(`Delete user with ID: ${userId}`);
+  },
 };
 
 const columns: TableColumnsType<UserDto> = [
@@ -51,9 +59,27 @@ const columns: TableColumnsType<UserDto> = [
     key: "role",
     render: (role: UserDto["role"]) =>
       role === UserRole.Admin ? (
-        <Tag color="blue">Admin</Tag>
+        <Tag
+          style={{
+            borderRadius: 4,
+            padding: "0 8px",
+            border: "1px solid #1890ff",
+          }}
+          color="blue"
+        >
+          Admin
+        </Tag>
       ) : (
-        <Tag color="green">User</Tag>
+        <Tag
+          style={{
+            borderRadius: 4,
+            padding: "0 8px",
+            border: "1px solid #52c41a",
+          }}
+          color="green"
+        >
+          User
+        </Tag>
       ),
   },
   {
@@ -66,6 +92,34 @@ const columns: TableColumnsType<UserDto> = [
       ) : (
         <Tag color="error">Inactive</Tag>
       ),
+  },
+
+  {
+    title: "Action",
+    key: "action",
+    width: 110,
+    render: (_: unknown, user: UserDto) => (
+      <Space size={4}>
+        <Button
+          type="text"
+          icon={<EditOutlined />}
+          onClick={() => message.info(`Edit user ${user.name}`)}
+        />
+        <Popconfirm
+          title="Are you sure you want to delete this user?"
+          okText="Yes"
+          cancelText="No"
+          description={`This action cannot be undone. User: ${user.name}`}
+          onConfirm={() => deleteUser.mutate(user.id)}
+        >
+          <Button
+            type="text"
+            icon={<DeleteOutlined />}
+            onClick={() => message.info(`Delete user ${user.name}`)}
+          />
+        </Popconfirm>
+      </Space>
+    ),
   },
 ];
 
@@ -139,7 +193,7 @@ function Users() {
   };
 
   return (
-    <Space orientation="vertical" size="large" style={{ width: "100%" }}>
+    <Space orientation="vertical" style={{ width: "100%" }}>
       {/* <Typography.Title level={3}>User Management</Typography.Title> */}
 
       {isError && (
@@ -153,11 +207,17 @@ function Users() {
         />
       )}
 
-      <Card>
+      <Card
+        style={{
+          borderRadius: 8,
+          boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+          border: "1px solid #bcbac5;",
+        }}
+        styles={{ body: { padding: 12 } }}
+      >
         <Space
           style={{
             width: "100%",
-            marginBottom: 16,
             justifyContent: "space-between",
           }}
           wrap
@@ -192,14 +252,28 @@ function Users() {
             ]}
           />
         </Space>
+      </Card>
 
+      <Card
+        style={{
+          borderRadius: 8,
+          boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+          border: "1px solid #bcbac5;",
+        }}
+        styles={{ body: { padding: 12 } }}
+      >
         <Table<UserDto>
           rowKey="id"
+          styles={{ header: { cell: { backgroundColor: "#f5f5f5" } } }}
           columns={columns}
           dataSource={filteredUsers}
           loading={isLoading}
-          pagination={false}
-          scroll={{ x: true, y: "calc(100vh - 280px)" }}
+          pagination={{
+            defaultPageSize: 10,
+            showSizeChanger: true,
+            pageSizeOptions: ["5", "10", "20", "50"],
+          }}
+          scroll={{ x: true, y: "calc(100vh - 330px)" }}
         />
       </Card>
 
